@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * PBPI Kabupaten Garut design tokens — clean editorial/federation system.
+ * Light mode first: white/off-white surfaces, PBPI red for emphasis, deep
+ * navy for institutional weight. Kept as CSS variables (in addition to the
+ * Tailwind tokens in tailwind.config.ts) per the design-system spec so raw
+ * CSS and inline styles (e.g. the distribution map, added later) can read
+ * them directly.
+ */
+:root {
+  color-scheme: light;
+  --pbpi-red: #C81E2C;
+  --pbpi-red-dark: #9E141F;
+  --navy: #0B2545;
+  --navy-dark: #071A33;
+  --background: #FFFFFF;
+  --surface: #F7F7F5;
+  --muted: #65707A;
+  --border: #E3E3DE;
+  --text: #0F1720;
+  --text-muted: #65707A;
+  --header-h: 5.5rem; /* taller, sport-federation-style navbar */
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-h); /* clears the sticky header when jumping to a #section */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  background: var(--background);
+  color: var(--text);
+}
+
+/* Section/display headings — bold condensed poster/jersey type, sport style. */
+.d {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 400; /* Anton only ships one weight — it's already heavy */
+  line-height: 0.98;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* Small uppercase eyebrow/label text used throughout the org site. */
+.lb {
+  font-family: var(--font-body), sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+::-webkit-scrollbar { height: 6px; width: 6px; }
+::-webkit-scrollbar-thumb { background: #C9CDC7; }
+
+@layer components {
+  .inp {
+    @apply w-full rounded-sm border border-line bg-white px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:border-navy focus:outline-none focus:ring-1 focus:ring-navy;
+  }
+  .btn-p {
+    @apply inline-flex items-center justify-center rounded-sm border border-accent bg-accent px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-accentDeep disabled:opacity-50;
+  }
+  .btn-o {
+    @apply inline-flex items-center justify-center rounded-sm border border-line bg-white px-4 py-2 text-xs font-bold uppercase tracking-widest text-ink transition hover:border-navy disabled:opacity-40;
+  }
+  /* Subtle border, minimal shadow — the card style used across the public site. */
+  .card {
+    @apply rounded-sm border border-line bg-white shadow-card;
+  }
+  .th { @apply px-4 py-3 text-left text-[0.68rem] font-bold uppercase tracking-widest text-muted; }
+  .td { @apply px-4 py-3; }
+  /* Consistent section container: generous spacing, capped content width. */
+  .section { @apply mx-auto max-w-site px-4 py-16 sm:px-8 sm:py-20; }
+  .section-title { @apply lb text-navy; }
+}
+
+@keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+.reveal { opacity: 0; transform: translateY(20px); animation: fade-up .7s cubic-bezier(.2,.8,.2,1) forwards; }
+
+/* Focus visibility for keyboard navigation (accessibility requirement). */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}

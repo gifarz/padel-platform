@@ -1,0 +1,441 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────── Enums ─────────
+enum Role {
+  SUPER_ADMIN
+  ATHLETE
+  TRAINER
+  REFEREE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Hand {
+  RIGHT
+  LEFT
+}
+
+enum CourtSide {
+  LEFT
+  RIGHT
+  BOTH
+}
+
+enum ProfileStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum MatchFormat {
+  SINGLES
+  DOUBLES
+}
+
+enum Team {
+  A
+  B
+}
+
+enum MatchStatus {
+  REQUESTED
+  ACCEPTED
+  SCHEDULED
+  PLAYED
+  PENDING_VERIFICATION
+  VERIFIED
+  CANCELLED
+}
+
+enum CompetitionStatus {
+  DRAFT
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum CompetitionCategory {
+  MENS_DOUBLES
+  WOMENS_DOUBLES
+  MIXED_DOUBLES
+  MENS_SINGLES
+  WOMENS_SINGLES
+  OPEN
+}
+
+enum ParticipantStatus {
+  REGISTERED
+  CONFIRMED
+  WAITLIST
+  ELIMINATED
+  WINNER
+}
+
+enum RatingReason {
+  INITIAL
+  MATCH
+  CORRECTION
+  ADMIN_ADJUSTMENT
+}
+
+enum NewsCategory {
+  ORGANISASI
+  TURNAMEN
+  PRESTASI
+  KOMUNITAS
+  PENGUMUMAN
+}
+
+// ───────── Users & profiles ─────────
+// Primary login identity is phone (Indonesian, normalized to +62…). Email is
+// kept only as an optional secondary contact field — nothing should require it.
+model User {
+  id           String   @id @default(cuid())
+  phone        String   @unique
+  email        String?  @unique
+  passwordHash String
+  name         String
+  image        String?
+  role         Role     @default(ATHLETE)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  athlete  AthleteProfile?
+  trainer  TrainerProfile?
+  referee  RefereeProfile?
+  submittedMatches Match[] @relation("MatchSubmittedBy")
+  verifiedMatches  Match[] @relation("MatchVerifiedBy")
+  news             News[]
+}
+
+model AthleteProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username          String    @unique
+  // Legacy free-text city, kept so existing rows keep working. New writes
+  // should set districtId instead — city is now optional.
+  city              String?
+  districtId        String?
+  district          District? @relation(fields: [districtId], references: [id])
+  clubId            String?
+  club              Club?     @relation(fields: [clubId], references: [id])
+  gender            Gender
+  birthDate         DateTime?
+  dominantHand      Hand?
+  preferredPosition CourtSide?
+  bio               String?
+  availability      Json?
+
+  // Denormalised rating snapshot. Source of truth for history is RatingHistory.
+  rating        Int @default(1000)
+  peakRating    Int @default(1000)
+  matchesPlayed Int @default(0)
+  wins          Int @default(0)
+  losses        Int @default(0)
+
+  matchParticipations MatchParticipant[]
+  matchesRequested    Match[]                  @relation("MatchRequestedBy")
+  ratingHistory       RatingHistory[]
+  competitions        CompetitionParticipant[] @relation("ParticipantAthlete")
+  asPartner           CompetitionParticipant[] @relation("ParticipantPartner")
+  achievements        Achievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([rating(sort: Desc)])
+  @@index([city, rating(sort: Desc)])
+  @@index([districtId, rating(sort: Desc)])
+}
+
+model TrainerProfile {
+  id           String        @id @default(cuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio          String?
+  specialties  String[]
+  yearsExp     Int           @default(0)
+  city         String?
+  districtId   String?
+  district     District?     @relation(fields: [districtId], references: [id])
+  rating       Decimal?      @db.Decimal(2, 1)
+  sessionPrice Int?
+  availability Json?
+  status       ProfileStatus @default(ACTIVE)
+  matches      Match[]
+}
+
+model RefereeProfile {
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certification  String
+  yearsExp       Int           @default(0)
+  city           String?
+  districtId     String?
+  district       District?     @relation(fields: [districtId], references: [id])
+  availability   Json?
+  status         ProfileStatus @default(ACTIVE)
+  matches        Match[]
+}
+
+// ───────── Administrative districts (kecamatan) ─────────
+// Seeded once with all 42 Kabupaten Garut kecamatan. Used by players, clubs,
+// the distribution map, and ranking/stat filters — single source of truth
+// instead of free-text city fields.
+model District {
+  id       String @id @default(cuid())
+  code     String @unique // Kemendagri-style short code, e.g. "garut-kota"
+  name     String
+  slug     String @unique
+  isActive Boolean @default(true)
+
+  athletes AthleteProfile[]
+  trainers TrainerProfile[]
+  referees RefereeProfile[]
+  clubs    Club[]
+
+  @@index([isActive])
+}
+
+// ───────── Clubs ─────────
+model Club {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  logoUrl     String?
+  description String?
+  address     String?
+  districtId  String?
+  district    District? @relation(fields: [districtId], references: [id])
+  phone       String?
+  instagram   String?
+  website     String?
+  latitude    Float?
+  longitude   Float?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members AthleteProfile[]
+
+  @@index([districtId])
+}
+
+// ───────── News ─────────
+model News {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  excerpt     String?
+  content     String
+  coverUrl    String?
+  category    NewsCategory @default(PENGUMUMAN)
+  publishedAt DateTime?
+  isPublished Boolean      @default(false)
+  authorId    String?
+  author      User?        @relation(fields: [authorId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([isPublished, publishedAt])
+}
+
+// ───────── Organization / pengurus ─────────
+model OrganizationMember {
+  id        String   @id @default(cuid())
+  name      String
+  position  String
+  division  String?
+  photoUrl  String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([isActive, sortOrder])
+}
+
+// ───────── Levels (admin-editable) ─────────
+model Level {
+  id        String @id @default(cuid())
+  name      String
+  slug      String @unique
+  minRating Int
+  maxRating Int?   // null = no upper bound
+  sortOrder Int    @unique
+}
+
+// ───────── Venues ─────────
+model Location {
+  id       String  @id @default(cuid())
+  name     String
+  city     String
+  province String
+  address  String?
+  lat      Float?
+  lng      Float?
+  courts       Court[]
+  competitions Competition[]
+}
+
+model Court {
+  id         String   @id @default(cuid())
+  name       String
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id])
+  isIndoor   Boolean  @default(false)
+  isActive   Boolean  @default(true)
+  matches      Match[]
+  competitions Competition[]
+}
+
+// ───────── Competitions ─────────
+model Competition {
+  id                   String              @id @default(cuid())
+  name                 String
+  description          String?
+  coverUrl             String?
+  locationId           String
+  location             Location            @relation(fields: [locationId], references: [id])
+  courtId              String?
+  court                Court?              @relation(fields: [courtId], references: [id])
+  startsAt             DateTime
+  endsAt               DateTime
+  registrationDeadline DateTime
+  category             CompetitionCategory
+  maxPlayers           Int
+  minRating            Int?
+  maxRating            Int?
+  prize                String?
+  rules                String?
+  status               CompetitionStatus   @default(DRAFT)
+
+  participants CompetitionParticipant[]
+  matches      Match[]
+  achievements Achievement[]
+  createdAt    DateTime @default(now())
+
+  @@index([status, startsAt])
+}
+
+model CompetitionParticipant {
+  id            String            @id @default(cuid())
+  competitionId String
+  competition   Competition       @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  athleteId     String
+  athlete       AthleteProfile    @relation("ParticipantAthlete", fields: [athleteId], references: [id])
+  partnerId     String?           // doubles partner
+  partner       AthleteProfile?   @relation("ParticipantPartner", fields: [partnerId], references: [id])
+  status        ParticipantStatus @default(REGISTERED)
+  seed          Int?              // reserved for bracket generation
+  registeredByAdmin Boolean       @default(false)
+  registeredAt  DateTime          @default(now())
+
+  @@unique([competitionId, athleteId])
+}
+
+// ───────── Matches ─────────
+model Match {
+  id            String       @id @default(cuid())
+  format        MatchFormat  @default(DOUBLES)
+  status        MatchStatus  @default(REQUESTED)
+
+  competitionId String?
+  competition   Competition? @relation(fields: [competitionId], references: [id])
+  // Bracket-ready: round + slot + where the winner advances to.
+  round         Int?
+  bracketSlot   Int?
+  nextMatchId   String?
+  nextMatch     Match?       @relation("MatchProgression", fields: [nextMatchId], references: [id])
+  feederMatches Match[]      @relation("MatchProgression")
+
+  courtId       String?
+  court         Court?       @relation(fields: [courtId], references: [id])
+  refereeId     String?
+  referee       RefereeProfile? @relation(fields: [refereeId], references: [id])
+  trainerId     String?
+  trainer       TrainerProfile? @relation(fields: [trainerId], references: [id])
+
+  requestedById String
+  requestedBy   AthleteProfile @relation("MatchRequestedBy", fields: [requestedById], references: [id])
+  scheduledAt   DateTime?
+  playedAt      DateTime?
+
+  sets          Json?        // [[6,4],[3,6],[6,2]] → [teamA, teamB] per set
+  winnerTeam    Team?
+  submittedById String?
+  submittedBy   User?        @relation("MatchSubmittedBy", fields: [submittedById], references: [id])
+  verifiedById  String?
+  verifiedBy    User?        @relation("MatchVerifiedBy", fields: [verifiedById], references: [id])
+  verifiedAt    DateTime?
+  cancelReason  String?
+
+  participants  MatchParticipant[]
+  ratingHistory RatingHistory[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model MatchParticipant {
+  id           String         @id @default(cuid())
+  matchId      String
+  match        Match          @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  athleteId    String
+  athlete      AthleteProfile @relation(fields: [athleteId], references: [id])
+  team         Team
+  acceptedAt   DateTime?      // set when this player accepts the challenge
+
+  // Filled in when the match is VERIFIED.
+  ratingBefore Int?
+  ratingAfter  Int?
+  ratingDelta  Int?
+
+  @@unique([matchId, athleteId])
+  @@index([athleteId])
+}
+
+// Append-only log. Never update or delete rows; corrections add new rows.
+model RatingHistory {
+  id           String         @id @default(cuid())
+  athleteId    String
+  athlete      AthleteProfile @relation(fields: [athleteId], references: [id])
+  matchId      String?
+  match        Match?         @relation(fields: [matchId], references: [id])
+  reason       RatingReason
+  ratingBefore Int
+  ratingAfter  Int
+  ratingDelta  Int
+  note         String?
+  createdById  String?
+  createdAt    DateTime       @default(now())
+
+  @@index([athleteId, createdAt])
+}
+
+model Achievement {
+  id            String         @id @default(cuid())
+  athleteId     String
+  athlete       AthleteProfile @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  competitionId String?
+  competition   Competition?   @relation(fields: [competitionId], references: [id])
+  title         String
+  description   String?
+  awardedAt     DateTime       @default(now())
+}
