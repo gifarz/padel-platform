@@ -17,7 +17,9 @@ export const DEFAULT_LEVELS: LevelDef[] = [
 
 export function levelForRating(rating: number, levels: LevelDef[] = DEFAULT_LEVELS): LevelDef {
   const sorted = [...levels].sort((a, b) => a.minRating - b.minRating)
-  return [...sorted].reverse().find((l) => rating >= l.minRating) ?? sorted[0]
+  const fallback = sorted[0]
+  if (!fallback) throw new Error('levelForRating: levels list is empty')
+  return [...sorted].reverse().find((l) => rating >= l.minRating) ?? fallback
 }
 
 /** Points left until the next level, or null at the top. */

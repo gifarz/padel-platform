@@ -10,7 +10,7 @@ export function CountUp({ value, className = '' }: { value: number; className?: 
     if (!el) return
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return
+        if (!entry?.isIntersecting) return
         const start = performance.now()
         const tick = (t: number) => {
           const p = Math.min((t - start) / 1400, 1)
