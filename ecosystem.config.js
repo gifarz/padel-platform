@@ -4,7 +4,7 @@ module.exports = {
             name: 'padel',
             cwd: __dirname,
             script: 'node_modules/next/dist/bin/next',
-            args: 'start -p 3011',
+            args: 'start -p 3030',
             instances: 1, // bump to 'max' for cluster mode once you outgrow one core
             exec_mode: 'fork',
             env: {
