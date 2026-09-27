@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getAthletesPage, getDistricts, getClubsForPicker } from '@/server/queries'
+import { getAthletesPage, getDistricts, getClubsForPicker, AthleteFilters } from '@/server/queries'
 import { PageBanner } from '@/components/public/page-banner'
 import { fmtNum } from '@/lib/format'
 import { DEFAULT_LEVELS } from '@/lib/rating/levels'
@@ -11,8 +11,8 @@ type Search = { q?: string; gender?: string; districtId?: string; clubId?: strin
 export default async function PlayersDirectoryPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams
   const page = Math.max(1, Number(sp.page) || 1)
-  const filters = {
-    gender: sp.gender === 'MALE' || sp.gender === 'FEMALE' ? sp.gender : undefined,
+  const filters: AthleteFilters = {
+    gender: sp.gender === 'MALE' ? 'MALE' : sp.gender === 'FEMALE' ? 'FEMALE' : undefined,
     districtId: sp.districtId || undefined,
     clubId: sp.clubId || undefined,
     levelSlug: sp.level || undefined,
