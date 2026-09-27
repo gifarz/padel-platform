@@ -11,7 +11,7 @@ export default async function SettingsPage() {
         Pengaturan<br /><span className="text-accent">profil.</span>
       </h1>
       <SettingsForm
-        city={profile.city}
+        city={profile.city ?? ''}
         bio={profile.bio}
         dominantHand={profile.dominantHand}
         preferredPosition={profile.preferredPosition}
