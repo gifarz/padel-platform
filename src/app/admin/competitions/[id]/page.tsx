@@ -11,8 +11,9 @@ const CATEGORY_LABEL: Record<string, string> = {
   MENS_SINGLES: 'Tunggal putra', WOMENS_SINGLES: 'Tunggal putri', OPEN: 'Terbuka',
 }
 
-export default async function AdminCompetitionDetail({ params }: { params: { id: string } }) {
-  const comp = await getCompetitionDetail(params.id)
+export default async function AdminCompetitionDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const comp = await getCompetitionDetail(id)
   if (!comp) notFound()
   const bracket = await getCompetitionBracket(comp.id)
   const confirmedCount = comp.participants.filter((p) => p.status === 'CONFIRMED').length
