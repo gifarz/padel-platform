@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getPublicCompetitions } from '@/server/queries'
 import { StatusBadge } from '@/components/ui/badge'
 import { fmtDate } from '@/lib/format'
+import { PageBanner } from '@/components/public/page-banner'
 
 const CATEGORY_LABEL: Record<string, string> = {
   MENS_DOUBLES: 'Ganda putra', WOMENS_DOUBLES: 'Ganda putri', MIXED_DOUBLES: 'Ganda campuran',
@@ -12,10 +13,9 @@ export default async function CompetitionsPage() {
   const competitions = await getPublicCompetitions()
 
   return (
-    <div className="section">
-      <p className="section-title">Kompetisi</p>
-      <h1 className="d mt-3 text-4xl text-navy sm:text-5xl lg:text-6xl">Turnamen &amp; Kompetisi</h1>
-
+    <div>
+      <PageBanner eyebrow="Kompetisi" title="Turnamen & Kompetisi" />
+      <div className="section">
       {competitions.length === 0 && <p className="mt-8 text-sm text-muted">Belum ada kompetisi yang dibuka pendaftarannya.</p>}
 
       <div className="mt-8 grid gap-px bg-line sm:grid-cols-2">
@@ -35,6 +35,7 @@ export default async function CompetitionsPage() {
             </div>
           </Link>
         ))}
+      </div>
       </div>
     </div>
   )

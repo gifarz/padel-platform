@@ -17,16 +17,19 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
   const me = await getMe()
 
   return (
-    <div className="section">
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
-        <div>
-          <p className="lb">{CATEGORY_LABEL[c.category] ?? c.category} · {c.location.name}, {c.location.city}</p>
-          <h1 className="d text-5xl sm:text-7xl">{c.name}</h1>
+    <div>
+      <div className="border-b border-navy-dark bg-navy pt-[var(--header-h)] text-white">
+        <div className="mx-auto flex max-w-site flex-wrap items-end justify-between gap-4 px-4 py-10 sm:px-8 sm:py-12">
+          <div>
+            <p className="lb text-white/60">{CATEGORY_LABEL[c.category] ?? c.category} · {c.location.name}, {c.location.city}</p>
+            <h1 className="d mt-2 text-5xl sm:text-7xl">{c.name}</h1>
+          </div>
+          <StatusBadge status={c.status} />
         </div>
-        <StatusBadge status={c.status} />
       </div>
 
-      {c.description && <p className="mt-6 max-w-2xl text-sm text-muted">{c.description}</p>}
+      <div className="section">
+      {c.description && <p className="max-w-2xl text-sm text-muted">{c.description}</p>}
 
       <div className="mt-8 grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
         <div className="bg-bg p-5"><p className="d text-3xl">{c.participants.length}/{c.maxPlayers}</p><p className="lb">Peserta</p></div>
@@ -61,6 +64,7 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
             <p className="text-sm text-muted">{fmtNum(p.athlete.rating)} pts</p>
           </div>
         ))}
+      </div>
       </div>
     </div>
   )

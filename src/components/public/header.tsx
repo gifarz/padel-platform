@@ -46,6 +46,7 @@ export const NAV_LINKS: NavLink[] = NAV_ITEMS.flatMap((i) => (i.children ? i.chi
 
 export function Header() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   // Lock body scroll while the mobile drawer is open.
   useEffect(() => {
@@ -53,8 +54,24 @@ export function Header() {
     return () => { document.body.style.overflow = '' }
   }, [open])
 
+  // Transparent over the hero/banner at the top of the page; solid navy
+  // once the person scrolls past it, so nav text stays legible over
+  // whatever content follows underneath.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="sticky inset-x-0 top-0 z-50 h-[var(--header-h)] border-b border-navy-dark bg-navy">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 h-[var(--header-h)] border-b transition-colors duration-300 ${
+        scrolled || open
+          ? 'border-navy-dark bg-navy shadow-sm'
+          : 'border-transparent bg-transparent'
+      }`}
+    >
       <div className="mx-auto flex h-full max-w-site items-center justify-between gap-4 px-4 sm:px-8">
         <Link href="/" className="flex items-center gap-2" aria-label="Beranda PBPI Kabupaten Garut">
           <Image src="/logo/favicon-white.svg" alt="" width={32} height={32} className="h-9 w-auto lg:hidden" />

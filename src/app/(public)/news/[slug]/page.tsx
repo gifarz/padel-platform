@@ -14,13 +14,18 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
   if (!news) notFound()
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
-      <Link href="/news" className="text-xs font-bold uppercase tracking-widest text-accent">← Kembali ke Berita</Link>
+    <article>
+      <div className="border-b border-navy-dark bg-navy pt-[var(--header-h)] text-white">
+        <div className="mx-auto max-w-3xl px-4 py-10 sm:px-8 sm:py-12">
+          <Link href="/news" className="text-xs font-bold uppercase tracking-widest text-white/70 hover:text-white">← Kembali ke Berita</Link>
 
-      <p className="lb mt-6 text-accent">{CATEGORY_LABEL[news.category] ?? news.category} &middot; {fmtDate(news.publishedAt)}</p>
-      <h1 className="d mt-3 text-4xl text-navy sm:text-5xl">{news.title}</h1>
-      {news.author && <p className="mt-3 text-xs text-muted">Oleh {news.author.name}</p>}
+          <p className="lb mt-6 text-white/60">{CATEGORY_LABEL[news.category] ?? news.category} &middot; {fmtDate(news.publishedAt)}</p>
+          <h1 className="d mt-3 text-4xl sm:text-5xl">{news.title}</h1>
+          {news.author && <p className="mt-3 text-xs text-white/60">Oleh {news.author.name}</p>}
+        </div>
+      </div>
 
+      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
       {news.coverUrl && (
         <div className="relative mt-6 h-64 w-full overflow-hidden rounded-sm border border-line sm:h-80">
           <Image src={news.coverUrl} alt="" fill className="object-cover" />
@@ -29,6 +34,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
 
       <div className="mt-8 space-y-4 text-sm leading-relaxed text-ink sm:text-base">
         {news.content.split('\n').filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
+      </div>
       </div>
     </article>
   )

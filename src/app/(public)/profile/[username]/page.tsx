@@ -18,35 +18,38 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
   }
 
   return (
-    <div className="section">
-      <div className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-8">
-        <div>
-          <p className="lb">{level.name} · {athlete.city}</p>
-          <h1 className="d text-5xl sm:text-7xl">{athlete.name}</h1>
-          <p className="mt-1 text-muted">@{athlete.username}</p>
-          {(athlete.dominantHand || athlete.preferredPosition) && (
-            <p className="mt-2 flex flex-wrap gap-x-4 text-xs text-muted">
-              {athlete.dominantHand && <span>Tangan dominan: {athlete.dominantHand}</span>}
-              {athlete.preferredPosition && <span>Posisi favorit: {athlete.preferredPosition}</span>}
-            </p>
+    <div>
+      <div className="border-b border-navy-dark bg-navy pt-[var(--header-h)] text-white">
+        <div className="mx-auto flex max-w-site flex-wrap items-end justify-between gap-6 px-4 py-10 sm:px-8 sm:py-12">
+          <div>
+            <p className="lb text-white/60">{level.name} · {athlete.city}</p>
+            <h1 className="d mt-2 text-5xl sm:text-7xl">{athlete.name}</h1>
+            <p className="mt-1 text-white/70">@{athlete.username}</p>
+            {(athlete.dominantHand || athlete.preferredPosition) && (
+              <p className="mt-2 flex flex-wrap gap-x-4 text-xs text-white/70">
+                {athlete.dominantHand && <span>Tangan dominan: {athlete.dominantHand}</span>}
+                {athlete.preferredPosition && <span>Posisi favorit: {athlete.preferredPosition}</span>}
+              </p>
+            )}
+          </div>
+          {isMe ? (
+            <a href="/settings" className="border border-white/30 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white/80 hover:border-white hover:text-white">
+              Edit profil
+            </a>
+          ) : me && (
+            <form action={challenge}>
+              <button className="border border-accent bg-accent px-6 py-3 text-xs font-bold uppercase tracking-widest text-white">
+                Tantang pemain →
+              </button>
+            </form>
           )}
         </div>
-        {isMe ? (
-          <a href="/settings" className="border border-line px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted hover:border-ink hover:text-ink">
-            Edit profil
-          </a>
-        ) : me && (
-          <form action={challenge}>
-            <button className="border border-accent bg-accent px-6 py-3 text-xs font-bold uppercase tracking-widest text-bg">
-              Tantang pemain →
-            </button>
-          </form>
-        )}
       </div>
 
-      {athlete.bio && <p className="mt-6 max-w-xl text-sm text-ink/85">{athlete.bio}</p>}
+      <div className="section">
+      {athlete.bio && <p className="text-sm text-ink/85">{athlete.bio}</p>}
 
-      <div className="grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
         <div className="bg-bg p-5"><p className="d text-4xl text-accent">{fmtNum(athlete.rating)}</p><p className="lb">Poin</p></div>
         <div className="bg-bg p-5"><p className="d text-4xl">{athlete.matchesPlayed}</p><p className="lb">Pertandingan</p></div>
         <div className="bg-bg p-5"><p className="d text-4xl">{athlete.winRate}%</p><p className="lb">Win rate</p></div>
@@ -73,6 +76,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   )

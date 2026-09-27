@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 export function Hero() {
   return (
-    <section className="relative -mt-0.5 flex min-h-[calc(100dvh-var(--header-h))] items-center overflow-hidden bg-navy text-white">
+    <section className="relative flex min-h-dvh items-center overflow-hidden bg-navy pt-[var(--header-h)] text-white">
       <Image
         src="/images/court-sunset.jpg"
         alt=""

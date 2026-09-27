@@ -11,8 +11,8 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <div>
-      <div className="border-b border-navy-dark bg-navy text-white">
-        <div className="mx-auto flex max-w-site flex-wrap items-center gap-5 px-4 py-12 sm:px-8">
+      <div className="border-b border-navy-dark bg-navy pt-[var(--header-h)] text-white">
+        <div className="mx-auto flex max-w-site flex-wrap items-center gap-5 px-4 py-10 sm:px-8">
           <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/20 bg-white">
             {club.logoUrl ? (
               <Image src={club.logoUrl} alt="" width={80} height={80} className="h-full w-full object-cover" />
