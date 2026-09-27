@@ -3,8 +3,13 @@ import { getAthleteAdminDetail, levelInfo } from '@/server/queries'
 import { fmtNum, fmtDate } from '@/lib/format'
 import { StatusBadge } from '@/components/ui/badge'
 
-export default async function AdminAthleteDetail({ params }: { params: { id: string } }) {
-  const detail = await getAthleteAdminDetail(params.id)
+export default async function AdminAthleteDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const detail = await getAthleteAdminDetail(id)
   if (!detail) notFound()
   const { athlete, history, matchCount, competitions } = detail
   const { level } = levelInfo(athlete.rating)
