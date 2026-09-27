@@ -16,10 +16,10 @@ export function OrganizationStats({ stats }: { stats: Stats }) {
         {items.map((s, i) => (
           <div
             key={s.label}
-            className={`border-line px-6 py-8 text-center sm:px-8 ${i % 2 === 0 ? 'border-r' : ''} sm:border-r sm:last:border-r-0`}
+            className={`border-line px-6 py-10 text-center sm:px-8 sm:py-14 ${i % 2 === 0 ? 'border-r' : ''} sm:border-r sm:last:border-r-0`}
           >
-            <CountUp value={s.value} className="d block text-4xl text-navy sm:text-5xl" />
-            <p className="lb mt-1.5">{s.label}</p>
+            <CountUp value={s.value} className="d block text-5xl text-navy sm:text-6xl lg:text-7xl" />
+            <p className="lb mt-2">{s.label}</p>
           </div>
         ))}
       </div>

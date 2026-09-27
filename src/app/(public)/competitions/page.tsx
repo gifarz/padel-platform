@@ -14,7 +14,7 @@ export default async function CompetitionsPage() {
   return (
     <div className="section">
       <p className="section-title">Kompetisi</p>
-      <h1 className="d mt-2 text-3xl text-navy sm:text-4xl">Turnamen &amp; Kompetisi</h1>
+      <h1 className="d mt-3 text-4xl text-navy sm:text-5xl lg:text-6xl">Turnamen &amp; Kompetisi</h1>
 
       {competitions.length === 0 && <p className="mt-8 text-sm text-muted">Belum ada kompetisi yang dibuka pendaftarannya.</p>}
 

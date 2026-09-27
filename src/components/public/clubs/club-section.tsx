@@ -9,7 +9,7 @@ export async function ClubSection() {
     <section className="border-t border-line bg-surface">
       <div className="section">
         <p className="section-title">Federasi</p>
-        <h2 className="d mt-2 text-3xl text-navy sm:text-4xl">Klub Padel di Kabupaten Garut</h2>
+        <h2 className="d mt-3 text-4xl text-navy sm:text-5xl lg:text-6xl">Klub Padel di Kabupaten Garut</h2>
 
         {clubs.length === 0 ? (
           <p className="mt-8 text-sm text-muted">Direktori klub sedang disusun. Pantau terus halaman ini.</p>
@@ -33,7 +33,7 @@ export async function ClubSection() {
           </div>
         )}
 
-        <Link href="/clubs" className="mt-6 inline-block text-xs font-bold uppercase tracking-widest text-accent">
+        <Link href="/clubs" className="mt-6 inline-block text-[13px] font-bold uppercase tracking-[0.06em] text-accent">
           Lihat Direktori Klub →
         </Link>
       </div>

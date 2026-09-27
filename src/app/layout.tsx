@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { Anton, Barlow_Condensed } from 'next/font/google'
+import { Montserrat, Inter } from 'next/font/google'
 import './globals.css'
 
-// Sport-style type system: Anton is a bold condensed poster/jersey-numeral
-// face for headings; Barlow Condensed is the athletic, slightly condensed
-// workhorse used everywhere else (nav, labels, body copy).
-const display = Anton({ subsets: ['latin'], weight: ['400'], variable: '--font-display' })
-const body = Barlow_Condensed({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-body' })
+// Editorial sports-brand type system: Montserrat (wide, geometric, heavy)
+// carries headings and display moments; Inter is the highly-readable
+// workhorse for navigation, labels and body copy.
+const display = Montserrat({ subsets: ['latin'], weight: ['700', '800', '900'], variable: '--font-display' })
+const body = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-body' })
 
 export const metadata: Metadata = {
   title: 'PBPI Kabupaten Garut',

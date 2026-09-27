@@ -10,7 +10,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <Link href="/" aria-label="Kembali ke beranda PBPI Kabupaten Garut" className="mb-6">
-        <Image src="/logo/pbpi-full.svg" alt="PBPI Kabupaten Garut" width={220} height={58} className="h-12 w-auto" priority />
+        <Image src="/logo/logo-black.svg" alt="PBPI Kabupaten Garut" width={250} height={60} className="h-20 w-auto" priority />
       </Link>
 
       <form action={action} className="w-full max-w-sm border border-line bg-surface p-8">

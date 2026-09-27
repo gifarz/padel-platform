@@ -22,7 +22,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
           </div>
           <div>
             {club.isVerified && <p className="lb text-red-300">Terverifikasi ✓</p>}
-            <h1 className="d mt-1 text-3xl sm:text-4xl">{club.name}</h1>
+            <h1 className="d mt-2 text-4xl sm:text-5xl">{club.name}</h1>
             <p className="mt-1 text-sm text-white/70">{club.district?.name ?? '-'} &middot; {club.members.length} anggota</p>
           </div>
         </div>

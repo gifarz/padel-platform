@@ -57,11 +57,11 @@ export function Header() {
     <header className="sticky inset-x-0 top-0 z-50 h-[var(--header-h)] border-b border-navy-dark bg-navy">
       <div className="mx-auto flex h-full max-w-site items-center justify-between gap-4 px-4 sm:px-8">
         <Link href="/" className="flex items-center gap-2" aria-label="Beranda PBPI Kabupaten Garut">
-          <Image src="/logo/pbpi-mark.svg" alt="" width={32} height={32} className="h-9 w-auto lg:hidden" />
-          <Image src="/logo/pbpi-full.svg" alt="PBPI Kabupaten Garut" width={240} height={64} className="hidden h-11 w-auto lg:block" priority />
+          <Image src="/logo/favicon-white.svg" alt="" width={32} height={32} className="h-9 w-auto lg:hidden" />
+          <Image src="/logo/logo-white.svg" alt="PBPI Kabupaten Garut" width={240} height={64} className="hidden h-16 w-auto lg:block" priority />
         </Link>
 
-        <nav aria-label="Navigasi utama" className="hidden h-full items-stretch gap-1 text-xs font-bold uppercase tracking-widest lg:flex">
+        <nav aria-label="Navigasi utama" className="hidden h-full items-stretch gap-1 text-[15px] font-semibold tracking-[0.01em] lg:flex">
           {NAV_ITEMS.map((item) =>
             item.children ? (
               <div key={item.label} className="group relative flex h-full items-center">
@@ -78,12 +78,12 @@ export function Header() {
                 {/* Invisible bridge closes the hover gap between the trigger and the panel. */}
                 <div className="absolute left-0 top-full hidden w-full group-hover:block group-focus-within:block" />
 
-                <div className="invisible absolute left-0 top-full min-w-[13rem] translate-y-1 rounded-sm border border-line bg-white opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <div className="invisible absolute left-0 top-full min-w-[13rem] translate-y-1 rounded border border-line bg-white opacity-0 shadow-sm transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                   {item.children.map((c) => (
                     <Link
                       key={c.href}
                       href={c.href}
-                      className="block border-b border-line px-4 py-3 text-ink normal-case tracking-normal transition last:border-0 hover:bg-surface hover:text-navy"
+                      className="block border-b border-line px-4 py-3 text-[15px] font-medium text-ink transition last:border-0 hover:bg-surface hover:text-navy"
                     >
                       {c.label}
                     </Link>
@@ -98,9 +98,9 @@ export function Header() {
           )}
         </nav>
 
-        <div className="hidden items-center gap-3 text-xs font-bold uppercase tracking-widest lg:flex">
+        <div className="hidden items-center gap-4 text-[15px] font-semibold tracking-[0.01em] lg:flex">
           <Link href="/login" className="text-white/80 hover:text-white">Masuk</Link>
-          <Link href="/register" className="btn-p">Gabung</Link>
+          <Link href="/register" className="btn-p h-11 px-6 text-[13px]">Gabung</Link>
         </div>
 
         <button

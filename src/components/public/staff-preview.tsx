@@ -11,7 +11,7 @@ export async function StaffPreview() {
       <div className="grid gap-10 sm:grid-cols-2">
         <div>
           <p className="section-title">Pelatih</p>
-          <h3 className="d mt-2 text-2xl text-navy">Pelatih Bersertifikat</h3>
+          <h3 className="d mt-3 text-3xl text-navy sm:text-4xl">Pelatih Bersertifikat</h3>
           <ul className="mt-4 divide-y divide-line border-y border-line">
             {t.length === 0 && <li className="py-4 text-sm text-muted">Belum ada pelatih terdaftar.</li>}
             {t.map((x) => (
@@ -26,7 +26,7 @@ export async function StaffPreview() {
 
         <div>
           <p className="section-title">Wasit</p>
-          <h3 className="d mt-2 text-2xl text-navy">Wasit Bersertifikat</h3>
+          <h3 className="d mt-3 text-3xl text-navy sm:text-4xl">Wasit Bersertifikat</h3>
           <ul className="mt-4 divide-y divide-line border-y border-line">
             {r.length === 0 && <li className="py-4 text-sm text-muted">Belum ada wasit terdaftar.</li>}
             {r.map((x) => (

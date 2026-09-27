@@ -12,11 +12,11 @@ export async function RankingSection() {
   return (
     <section id="peringkat" className="section">
       <p className="section-title">Peringkat Pemain</p>
-      <h2 className="d mt-2 text-3xl text-navy sm:text-4xl">Peringkat Pemain PBPI</h2>
+      <h2 className="d mt-3 text-4xl text-navy sm:text-5xl lg:text-6xl">Peringkat Pemain PBPI</h2>
 
       <RankingTabs putra={putra} putri={putri} campuran={campuran} />
 
-      <Link href="/ranking" className="mt-6 inline-block text-xs font-bold uppercase tracking-widest text-accent">
+      <Link href="/ranking" className="mt-6 inline-block text-[13px] font-bold uppercase tracking-[0.06em] text-accent">
         Lihat Semua Peringkat →
       </Link>
     </section>

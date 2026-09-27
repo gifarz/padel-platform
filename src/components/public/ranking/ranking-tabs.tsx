@@ -46,8 +46,8 @@ export function RankingTabs({ putra, putri, campuran }: Record<Tab, Player[]>) {
             )}
             {data.map((p, i) => (
               <tr key={p.id} className={`border-b border-line last:border-0 ${i === 0 ? 'bg-surface' : ''}`}>
-                <td className="td d text-navy">{i + 1}</td>
-                <td className="td font-semibold text-ink">{p.name}</td>
+                <td className={`td d ${i === 0 ? 'text-accent' : 'text-navy'} text-lg`}>{i + 1}</td>
+                <td className="td text-[15px] font-semibold text-ink">{p.name}</td>
                 <td className="td text-muted">{p.club ?? '-'}</td>
                 <td className="td text-right font-bold text-navy">{fmtNum(p.rating)}</td>
               </tr>

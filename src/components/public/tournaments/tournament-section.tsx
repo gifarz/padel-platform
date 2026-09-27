@@ -16,7 +16,7 @@ export async function TournamentSection() {
   return (
     <section className="section">
       <p className="section-title">Kompetisi</p>
-      <h2 className="d mt-2 text-3xl text-navy sm:text-4xl">Turnamen Mendatang</h2>
+      <h2 className="d mt-3 text-4xl text-navy sm:text-5xl lg:text-6xl">Turnamen Mendatang</h2>
 
       {tournaments.length === 0 ? (
         <p className="mt-8 text-sm text-muted">Belum ada turnamen yang dijadwalkan saat ini.</p>
@@ -30,10 +30,10 @@ export async function TournamentSection() {
               </div>
               <div className="min-w-0">
                 <p className="lb text-accent">{STATUS_LABEL[t.status] ?? t.status}</p>
-                <p className="mt-1 truncate font-display text-base font-bold text-ink">{t.name}</p>
+                <p className="mt-1 truncate font-display text-lg font-extrabold text-ink">{t.name}</p>
                 <p className="mt-1 text-xs text-muted">{t.location.city} &middot; {CATEGORY_LABEL[t.category] ?? t.category}</p>
                 <p className="mt-1 text-xs font-semibold text-navy">{t._count.participants} / {t.maxPlayers} Peserta</p>
-                <Link href={`/tournaments/${t.id}`} className="mt-2 inline-block text-xs font-bold uppercase tracking-widest text-accent">
+                <Link href={`/tournaments/${t.id}`} className="mt-2 inline-block text-[13px] font-bold uppercase tracking-[0.06em] text-accent">
                   Detail Turnamen →
                 </Link>
               </div>

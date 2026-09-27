@@ -18,7 +18,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
       <Link href="/news" className="text-xs font-bold uppercase tracking-widest text-accent">← Kembali ke Berita</Link>
 
       <p className="lb mt-6 text-accent">{CATEGORY_LABEL[news.category] ?? news.category} &middot; {fmtDate(news.publishedAt)}</p>
-      <h1 className="d mt-2 text-3xl text-navy sm:text-4xl">{news.title}</h1>
+      <h1 className="d mt-3 text-4xl text-navy sm:text-5xl">{news.title}</h1>
       {news.author && <p className="mt-3 text-xs text-muted">Oleh {news.author.name}</p>}
 
       {news.coverUrl && (

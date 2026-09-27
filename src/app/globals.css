@@ -22,7 +22,7 @@
   --border: #E3E3DE;
   --text: #0F1720;
   --text-muted: #65707A;
-  --header-h: 5.5rem; /* taller, sport-federation-style navbar */
+  --header-h: 6rem; /* premium, spacious sport-federation navbar */
 }
 
 html {
@@ -39,12 +39,12 @@ body {
   color: var(--text);
 }
 
-/* Section/display headings — bold condensed poster/jersey type, sport style. */
+/* Section/display headings — bold, wide, geometric editorial sports type. */
 .d {
   font-family: var(--font-display), system-ui, sans-serif;
-  font-weight: 400; /* Anton only ships one weight — it's already heavy */
-  line-height: 0.98;
-  letter-spacing: 0.01em;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
   text-transform: uppercase;
 }
 
@@ -52,8 +52,8 @@ body {
 .lb {
   font-family: var(--font-body), sans-serif;
   font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -63,22 +63,22 @@ body {
 
 @layer components {
   .inp {
-    @apply w-full rounded-sm border border-line bg-white px-4 py-2.5 text-sm text-ink placeholder:text-muted focus:border-navy focus:outline-none focus:ring-1 focus:ring-navy;
+    @apply w-full rounded border border-line bg-white px-4 py-2.5 text-[15px] text-ink placeholder:text-muted focus:border-navy focus:outline-none focus:ring-1 focus:ring-navy;
   }
   .btn-p {
-    @apply inline-flex items-center justify-center rounded-sm border border-accent bg-accent px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-accentDeep disabled:opacity-50;
+    @apply inline-flex h-14 items-center justify-center rounded border border-accent bg-accent px-8 text-[15px] font-bold uppercase tracking-[0.04em] text-white transition hover:bg-accentDeep hover:-translate-y-px disabled:opacity-50;
   }
   .btn-o {
-    @apply inline-flex items-center justify-center rounded-sm border border-line bg-white px-4 py-2 text-xs font-bold uppercase tracking-widest text-ink transition hover:border-navy disabled:opacity-40;
+    @apply inline-flex h-14 items-center justify-center rounded border border-white/70 bg-transparent px-8 text-[15px] font-bold uppercase tracking-[0.04em] text-white transition hover:border-white hover:-translate-y-px disabled:opacity-40;
   }
-  /* Subtle border, minimal shadow — the card style used across the public site. */
+  /* Whisper-quiet border, no shadow — the card style used across the public site. */
   .card {
-    @apply rounded-sm border border-line bg-white shadow-card;
+    @apply rounded border border-line bg-white transition-colors hover:border-navy/40;
   }
-  .th { @apply px-4 py-3 text-left text-[0.68rem] font-bold uppercase tracking-widest text-muted; }
+  .th { @apply px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-[0.08em] text-muted; }
   .td { @apply px-4 py-3; }
   /* Consistent section container: generous spacing, capped content width. */
-  .section { @apply mx-auto max-w-site px-4 py-16 sm:px-8 sm:py-20; }
+  .section { @apply mx-auto max-w-site px-4 py-20 sm:px-8 md:py-24 lg:py-28; }
   .section-title { @apply lb text-navy; }
 }
 

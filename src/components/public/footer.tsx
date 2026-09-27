@@ -36,7 +36,7 @@ export function Footer() {
       <div className="mx-auto max-w-site px-4 py-14 sm:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <div>
-            <Image src="/logo/pbpi-full.svg" alt="PBPI Kabupaten Garut" width={220} height={58} className="h-10 w-auto" />
+            <Image src="/logo/logo-white.svg" alt="PBPI Kabupaten Garut" width={220} height={58} className="h-14 w-auto" />
             <p className="mt-4 max-w-xs text-sm text-white/70">
               Persatuan Besar Padel Indonesia, Pengurus Kabupaten Garut. Organisasi resmi yang menaungi atlet,
               klub, pelatih, dan wasit padel di Kabupaten Garut.
