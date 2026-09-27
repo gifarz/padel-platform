@@ -12,10 +12,11 @@ const SORTS = [
 export default async function PlayersPage({
   searchParams,
 }: {
-  searchParams: { city?: string; sort?: 'match' | 'rating' | 'active' }
+  searchParams: Promise<{ city?: string; sort?: 'match' | 'rating' | 'active' }>
 }) {
-  const city = searchParams.city ?? 'Semua'
-  const sort = searchParams.sort ?? 'match'
+  const { city: cityParam, sort: sortParam } = await searchParams
+  const city = cityParam ?? 'Semua'
+  const sort = sortParam ?? 'match'
   const [list, cities] = await Promise.all([getDiscovery({ city, sort }), getCities()])
 
   const qs = (over: Partial<{ city: string; sort: string }>) => {
