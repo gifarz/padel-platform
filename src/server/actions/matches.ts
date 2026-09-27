@@ -2,7 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireAdmin, requireAthlete } from '@/server/guards'
-import { parseScore } from '@/lib/score'
+import { parseScore, flipSets } from '@/lib/score'
 import type { FormState } from '@/server/form-state'
 import { verifyMatch, correctMatchResult, MatchVerificationError } from '../services/match-verification'
 
@@ -61,7 +61,7 @@ export async function submitResultAction(_prev: FormState, formData: FormData): 
   if ('error' in parsed) return { error: parsed.error }
 
   // Sets are always stored from Team A's perspective.
-  const sets = participant.team === 'A' ? parsed.sets : parsed.sets.map(([a, b]) => [b, a])
+  const sets = participant.team === 'A' ? parsed.sets : flipSets(parsed.sets)
   const winnerTeam = participant.team === 'A' ? parsed.winner : parsed.winner === 'A' ? 'B' : 'A'
 
   await db.match.update({
