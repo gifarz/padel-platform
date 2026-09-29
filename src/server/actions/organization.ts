@@ -2,6 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireAdmin } from '@/server/guards'
+import { revalidatePublicSite } from '@/server/revalidate'
 import type { FormState } from '@/server/form-state'
 
 export async function createMemberAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -18,6 +19,7 @@ export async function createMemberAction(_prev: FormState, formData: FormData): 
     await db.organizationMember.create({ data: { name, position, division, photoUrl, sortOrder } })
     revalidatePath('/admin/organization')
     revalidatePath('/organization')
+    revalidatePublicSite()
     return { ok: `Pengurus "${name}" ditambahkan.` }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Gagal menambahkan pengurus.' }
@@ -29,6 +31,7 @@ export async function toggleMemberActiveAction(id: string, isActive: boolean) {
   await db.organizationMember.update({ where: { id }, data: { isActive } })
   revalidatePath('/admin/organization')
   revalidatePath('/organization')
+  revalidatePublicSite()
 }
 
 export async function deleteMemberAction(id: string) {
@@ -36,4 +39,5 @@ export async function deleteMemberAction(id: string) {
   await db.organizationMember.delete({ where: { id } })
   revalidatePath('/admin/organization')
   revalidatePath('/organization')
+  revalidatePublicSite()
 }

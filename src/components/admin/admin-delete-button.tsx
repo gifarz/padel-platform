@@ -17,7 +17,13 @@ export function AdminDeleteButton({
       disabled={pending}
       onClick={() => {
         if (!window.confirm(confirmMessage)) return
-        startTransition(() => { action(id) })
+        startTransition(async () => {
+          try {
+            await action(id)
+          } catch (err) {
+            window.alert(err instanceof Error ? err.message : 'Gagal menghapus.')
+          }
+        })
       }}
       className="text-xs font-bold uppercase tracking-widest text-muted hover:text-accent disabled:opacity-50"
     >

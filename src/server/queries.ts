@@ -282,6 +282,14 @@ export async function getLocations() {
   return db.location.findMany({ orderBy: { city: 'asc' }, include: { courts: true } })
 }
 
+/** Locations for the admin list — includes how many competitions use each one, to warn before deletion. */
+export async function getLocationsAdmin() {
+  return db.location.findMany({
+    orderBy: [{ city: 'asc' }, { name: 'asc' }],
+    include: { courts: true, _count: { select: { competitions: true } } },
+  })
+}
+
 /** Active Kabupaten Garut kecamatan, for registration/filter dropdowns. */
 export async function getDistricts() {
   return db.district.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } })

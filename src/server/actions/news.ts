@@ -1,9 +1,12 @@
 'use server'
-import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { auth } from '@/auth'
 import { requireAdmin } from '@/server/guards'
+import { revalidatePublicSite } from '@/server/revalidate'
+import { revalidatePath } from 'next/cache'
 import { slugify } from '@/lib/slug'
+import { sanitizeImageUrl } from '@/lib/uploads'
+import { plainExcerpt } from '@/lib/markdown'
 import type { FormState } from '@/server/form-state'
 
 const CATEGORIES = ['ORGANISASI', 'TURNAMEN', 'PRESTASI', 'KOMUNITAS', 'PENGUMUMAN'] as const
@@ -15,8 +18,9 @@ export async function createNewsAction(_prev: FormState, formData: FormData): Pr
     const content = String(formData.get('content') ?? '').trim()
     if (!title || !content) return { error: 'Judul dan isi berita wajib diisi.' }
 
-    const excerpt = String(formData.get('excerpt') ?? '').trim() || undefined
-    const coverUrl = String(formData.get('coverUrl') ?? '').trim() || undefined
+    const excerptRaw = String(formData.get('excerpt') ?? '').trim()
+    const excerpt = excerptRaw || plainExcerpt(content)
+    const coverUrl = sanitizeImageUrl(formData.get('coverUrl'))
     const categoryRaw = String(formData.get('category') ?? 'PENGUMUMAN')
     const category = (CATEGORIES as readonly string[]).includes(categoryRaw) ? categoryRaw : 'PENGUMUMAN'
     const isPublished = formData.get('isPublished') === 'on'
@@ -39,7 +43,7 @@ export async function createNewsAction(_prev: FormState, formData: FormData): Pr
     })
     revalidatePath('/admin/news')
     revalidatePath('/news')
-    revalidatePath('/')
+    revalidatePublicSite()
     return { ok: `Berita "${title}" dibuat.` }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Gagal membuat berita.' }
@@ -54,7 +58,7 @@ export async function toggleNewsPublishedAction(id: string, isPublished: boolean
   })
   revalidatePath('/admin/news')
   revalidatePath('/news')
-  revalidatePath('/')
+  revalidatePublicSite()
 }
 
 export async function deleteNewsAction(id: string) {
@@ -62,4 +66,5 @@ export async function deleteNewsAction(id: string) {
   await db.news.delete({ where: { id } })
   revalidatePath('/admin/news')
   revalidatePath('/news')
+  revalidatePublicSite()
 }

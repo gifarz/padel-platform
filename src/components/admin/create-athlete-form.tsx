@@ -1,15 +1,14 @@
 'use client'
-import { useActionState } from 'react'
 import { createAthleteAction } from '@/server/actions/admin-athletes'
-import type { FormState } from '@/server/form-state'
+import { useActionForm } from './use-action-form'
 
 type District = { id: string; name: string }
 type Club = { id: string; name: string; districtId: string | null }
 
-export function CreateAthleteForm({ districts, clubs }: { districts: District[]; clubs: Club[] }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(createAthleteAction, undefined)
+export function CreateAthleteForm({ districts, clubs, onCreated }: { districts: District[]; clubs: Club[]; onCreated?: () => void }) {
+  const { state, pending, formRef, onSubmit } = useActionForm(createAthleteAction, onCreated)
   return (
-    <form action={action} className="mt-4 grid gap-3 border border-line bg-surface p-5 sm:grid-cols-2">
+    <form ref={formRef} onSubmit={onSubmit} className="mt-4 grid gap-3 border border-line bg-surface p-5 sm:grid-cols-2">
       <input name="name" placeholder="Nama lengkap" required className="inp" />
       <input name="username" placeholder="Username" required className="inp" />
       <input name="phone" type="tel" placeholder="Nomor HP (cth. 081234567890)" required className="inp" />
@@ -30,8 +29,8 @@ export function CreateAthleteForm({ districts, clubs }: { districts: District[];
         ))}
       </select>
       <button disabled={pending} className="btn-p sm:col-span-2 sm:w-fit">{pending ? 'Membuat…' : 'Tambah atlet'}</button>
-      {state?.error && <p className="text-xs text-red-400 sm:col-span-2">{state.error}</p>}
-      {state?.ok && <p className="text-xs text-accent sm:col-span-2">{state.ok}</p>}
+      {state?.error && <p role="alert" className="text-xs text-red-400 sm:col-span-2">{state.error}</p>}
+      {state?.ok && <p role="status" className="text-xs text-accent sm:col-span-2">{state.ok}</p>}
     </form>
   )
 }

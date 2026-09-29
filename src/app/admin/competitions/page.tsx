@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getCompetitions } from '@/server/queries'
+import { getCompetitions, getLocations } from '@/server/queries'
 import { StatusBadge } from '@/components/ui/badge'
 import { fmtDate } from '@/lib/format'
 import { CreateCompetitionForm } from '@/components/admin/create-competition-form'
@@ -10,7 +10,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 }
 
 export default async function AdminCompetitionsPage() {
-  const competitions = await getCompetitions()
+  const [competitions, locations] = await Promise.all([getCompetitions(), getLocations()])
 
   return (
     <div>
@@ -50,7 +50,7 @@ export default async function AdminCompetitionsPage() {
       </div>
 
       <h2 className="d mt-10 text-2xl">Buat kompetisi baru</h2>
-      <CreateCompetitionForm />
+      <CreateCompetitionForm locations={locations.map((l: { id: string; name: string; city: string }) => ({ id: l.id, name: l.name, city: l.city }))} />
     </div>
   )
 }

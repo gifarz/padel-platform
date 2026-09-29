@@ -5,6 +5,7 @@ import { db } from '@/lib/db'
 import { requireAdmin } from '@/server/guards'
 import { getAthletesPage } from '@/server/queries'
 import { normalizeIndonesianPhone } from '@/lib/phone'
+import { revalidatePublicSite } from '@/server/revalidate'
 import type { FormState } from '@/server/form-state'
 
 export async function searchAthletesAction(query: string, page: number) {
@@ -17,6 +18,7 @@ export async function setAthletesActiveAction(athleteProfileIds: string[], isAct
   const users = await db.athleteProfile.findMany({ where: { id: { in: athleteProfileIds } }, select: { userId: true } })
   await db.user.updateMany({ where: { id: { in: users.map((u) => u.userId) } }, data: { isActive } })
   revalidatePath('/admin/athletes')
+  revalidatePath('/players')
 }
 
 /**
@@ -71,6 +73,12 @@ export async function createAthleteAction(_prev: FormState, formData: FormData):
     })
 
     revalidatePath('/admin/athletes')
+    revalidatePath('/players')
+    revalidatePath('/ranking')
+    if (clubId) revalidatePath(`/clubs`)
+    // A new athlete changes the landing page's player count, district
+    // distribution map, and ranking preview — all rendered from the DB.
+    revalidatePublicSite()
     return { ok: `Atlet dibuat. Kata sandi sementara: ${tempPassword}` }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Gagal membuat atlet.' }

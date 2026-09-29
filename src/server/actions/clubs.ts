@@ -3,6 +3,8 @@ import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireAdmin } from '@/server/guards'
 import { slugify } from '@/lib/slug'
+import { sanitizeImageUrl } from '@/lib/uploads'
+import { revalidatePublicSite } from '@/server/revalidate'
 import type { FormState } from '@/server/form-state'
 
 export async function createClubAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -17,7 +19,7 @@ export async function createClubAction(_prev: FormState, formData: FormData): Pr
     const phone = String(formData.get('phone') ?? '').trim() || undefined
     const instagram = String(formData.get('instagram') ?? '').trim() || undefined
     const website = String(formData.get('website') ?? '').trim() || undefined
-    const logoUrl = String(formData.get('logoUrl') ?? '').trim() || undefined
+    const logoUrl = sanitizeImageUrl(formData.get('logoUrl'))
     const isVerified = formData.get('isVerified') === 'on'
 
     const baseSlug = slugify(name)
@@ -31,6 +33,7 @@ export async function createClubAction(_prev: FormState, formData: FormData): Pr
     })
     revalidatePath('/admin/clubs')
     revalidatePath('/clubs')
+    revalidatePublicSite()
     return { ok: `Klub "${name}" dibuat.` }
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Gagal membuat klub.' }
@@ -42,6 +45,7 @@ export async function toggleClubVerifiedAction(id: string, isVerified: boolean) 
   await db.club.update({ where: { id }, data: { isVerified } })
   revalidatePath('/admin/clubs')
   revalidatePath('/clubs')
+  revalidatePublicSite()
 }
 
 export async function deleteClubAction(id: string) {
@@ -52,4 +56,5 @@ export async function deleteClubAction(id: string) {
   await db.club.delete({ where: { id } })
   revalidatePath('/admin/clubs')
   revalidatePath('/clubs')
+  revalidatePublicSite()
 }

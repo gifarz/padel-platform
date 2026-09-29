@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireAdmin, requireAthlete } from '@/server/guards'
 import { parseScore, flipSets } from '@/lib/score'
+import { revalidatePublicSite } from '@/server/revalidate'
 import type { FormState } from '@/server/form-state'
 import { verifyMatch, correctMatchResult, MatchVerificationError } from '../services/match-verification'
 
@@ -85,6 +86,8 @@ export async function verifyMatchAction(matchId: string): Promise<FormState> {
   revalidatePath('/admin/matches')
   revalidatePath('/ranking')
   revalidatePath('/dashboard')
+  // Verified matches change the landing page's match count and ranking preview.
+  revalidatePublicSite()
   return { ok: 'Hasil diverifikasi, rating diperbarui.' }
 }
 
@@ -101,6 +104,7 @@ export async function correctMatchAction(_prev: FormState, formData: FormData): 
   }
   revalidatePath('/admin/matches')
   revalidatePath('/ranking')
+  revalidatePublicSite()
   return { ok: 'Hasil dikoreksi, rating diperbarui ulang.' }
 }
 

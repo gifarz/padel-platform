@@ -2,6 +2,7 @@
 import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireAdmin, requireAthlete } from '@/server/guards'
+import { revalidatePublicSite } from '@/server/revalidate'
 import { parseLocalDateTime } from '@/lib/format'
 import type { FormState } from '@/server/form-state'
 import { generateBracket, BracketError } from '@/server/services/bracket'
@@ -44,6 +45,8 @@ export async function adminRegisterAthleteAction(_prev: FormState, formData: For
 
   await db.competitionParticipant.create({ data: { competitionId, athleteId, partnerId, status: 'REGISTERED', registeredByAdmin: true } })
   revalidatePath(`/admin/competitions/${competitionId}`)
+  revalidatePath(`/competitions/${competitionId}`)
+  revalidatePath('/competitions')
   return { ok: 'Atlet berhasil didaftarkan.' }
 }
 
@@ -105,4 +108,6 @@ export async function updateCompetitionStatusAction(competitionId: string, statu
   await db.competition.update({ where: { id: competitionId }, data: { status: status as never } })
   revalidatePath('/admin/competitions')
   revalidatePath(`/admin/competitions/${competitionId}`)
+  // Status is what decides whether a competition shows up on the public site at all.
+  revalidatePublicSite()
 }

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getNewsBySlug } from '@/server/queries'
 import { fmtDate } from '@/lib/format'
+import { Markdown } from '@/components/content/markdown'
 
 const CATEGORY_LABEL: Record<string, string> = {
   ORGANISASI: 'Organisasi', TURNAMEN: 'Turnamen', PRESTASI: 'Prestasi', KOMUNITAS: 'Komunitas', PENGUMUMAN: 'Pengumuman',
@@ -32,8 +33,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
         </div>
       )}
 
-      <div className="mt-8 space-y-4 text-sm leading-relaxed text-ink sm:text-base">
-        {news.content.split('\n').filter(Boolean).map((para, i) => <p key={i}>{para}</p>)}
+      <div className="mt-8">
+        <Markdown>{news.content}</Markdown>
       </div>
       </div>
     </article>

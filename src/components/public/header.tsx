@@ -95,12 +95,12 @@ export function Header() {
                 {/* Invisible bridge closes the hover gap between the trigger and the panel. */}
                 <div className="absolute left-0 top-full hidden w-full group-hover:block group-focus-within:block" />
 
-                <div className="invisible absolute left-0 top-full min-w-[13rem] translate-y-1 rounded border border-line bg-white opacity-0 shadow-sm transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                <div className="invisible absolute left-0 top-full min-w-[13rem] translate-y-1 overflow-hidden rounded border border-line bg-white opacity-0 shadow-md transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
                   {item.children.map((c) => (
                     <Link
                       key={c.href}
                       href={c.href}
-                      className="block border-b border-line px-4 py-3 text-[15px] font-medium text-ink transition last:border-0 hover:bg-surface hover:text-navy"
+                      className="block border-b border-line px-4 py-3 text-[15px] font-medium text-ink transition-colors duration-150 last:border-0 hover:bg-navy hover:text-white hover:shadow-[inset_3px_0_0_#C81E2C] focus-visible:bg-navy focus-visible:text-white focus-visible:outline-none focus-visible:shadow-[inset_3px_0_0_#C81E2C]"
                     >
                       {c.label}
                     </Link>

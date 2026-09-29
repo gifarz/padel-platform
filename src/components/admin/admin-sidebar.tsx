@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/admin/athletes', label: 'Atlet' },
   { href: '/admin/matches', label: 'Pertandingan' },
   { href: '/admin/competitions', label: 'Kompetisi' },
+  { href: '/admin/locations', label: 'Lokasi' },
   { href: '/admin/clubs', label: 'Klub' },
   { href: '/admin/trainers', label: 'Pelatih' },
   { href: '/admin/referees', label: 'Wasit' },
