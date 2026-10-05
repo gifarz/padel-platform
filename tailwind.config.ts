@@ -7,11 +7,12 @@ export default {
       colors: {
         // PBPI brand
         pbpi: { DEFAULT: '#C81E2C', dark: '#9E141F' },
-        navy: { DEFAULT: '#0B2545', dark: '#071A33', light: '#13335C' },
+        navy: { DEFAULT: '#14282D', dark: '#0C1B20', light: '#24434A' },
+        lime: '#D8F36A',
         // Neutral surfaces
         bg: '#FFFFFF',
-        surface: '#F7F7F5',
-        surface2: '#EFEFEC',
+        surface: '#F5F6F1',
+        surface2: '#EBEEE5',
         // Legacy aliases kept so untouched components (admin/athlete areas)
         // still resolve — same palette, mapped onto the light theme.
         ink: '#0F1720',
@@ -28,7 +29,7 @@ export default {
         body: ['var(--font-body)', 'system-ui', 'sans-serif'],
       },
       maxWidth: { site: '1360px' },
-      boxShadow: { card: '0 1px 2px rgba(11,37,69,0.06)' },
+       boxShadow: { card: '0 12px 40px rgba(20,40,45,0.07)' },
     },
   },
   plugins: [],

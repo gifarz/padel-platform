@@ -10,6 +10,7 @@ import { NewsSection } from '@/components/public/news/news-section'
 import { OrgIntro } from '@/components/public/org-intro'
 import { StaffPreview } from '@/components/public/staff-preview'
 import { CtaSection } from '@/components/public/cta-section'
+import { ExploreSection } from '@/components/public/explore-section'
 import { getPublicStats, getDistrictDistribution } from '@/server/queries'
 
 export default async function LandingPage() {
@@ -18,13 +19,14 @@ export default async function LandingPage() {
   return (
     <div className="bg-bg text-ink">
       <Header />
-      <main>
+      <main id="main-content">
         <Hero />
         <OrganizationStats stats={stats} />
-        <DistributionSection rows={distribution} />
+        <ExploreSection />
         <RankingSection />
         <TournamentSection />
         <ClubSection />
+        <DistributionSection rows={distribution} />
         <NewsSection />
         <OrgIntro />
         <StaffPreview />

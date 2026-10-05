@@ -5,18 +5,33 @@ import { NAV_ITEMS } from './header'
 
 export function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
     closeButtonRef.current?.focus()
-    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key !== 'Tab') return
+      const elements = dialogRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+      if (!elements?.length) return
+      const first = elements[0]
+      const last = elements[elements.length - 1]
+      if (!first || !last) return
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [open, onClose])
 
   return (
     <div
+      ref={dialogRef}
+      id="mobile-navigation"
+      aria-hidden={!open}
+      inert={!open}
       className={`fixed inset-0 z-[60] lg:hidden ${open ? '' : 'pointer-events-none'}`}
       role="dialog"
       aria-modal="true"

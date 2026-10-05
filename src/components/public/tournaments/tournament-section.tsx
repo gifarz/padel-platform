@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ArrowUpRight, CalendarDays, MapPin, Users } from 'lucide-react'
 import { getUpcomingTournaments } from '@/server/queries'
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -15,29 +16,28 @@ export async function TournamentSection() {
 
   return (
     <section className="section">
-      <p className="section-title">Kompetisi</p>
-      <h2 className="d mt-3 text-4xl text-navy sm:text-5xl lg:text-6xl">Turnamen Mendatang</h2>
+      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <div><p className="section-title">Saatnya bertanding</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Next up. Game on.</h2><p className="mt-4 text-sm text-muted">Tandai kalendermu. Tantangan berikutnya menanti.</p></div>
+        <Link href="/tournaments" className="section-link">Semua Turnamen <ArrowUpRight size={18} aria-hidden="true" /></Link>
+      </div>
 
       {tournaments.length === 0 ? (
-        <p className="mt-8 text-sm text-muted">Belum ada turnamen yang dijadwalkan saat ini.</p>
+        <div className="empty-state"><CalendarDays size={28} className="mx-auto mb-4 text-navy/40" aria-hidden="true" /><p className="font-semibold text-navy">Bersiap untuk pertandingan berikutnya.</p><p className="mt-2">Belum ada turnamen yang dijadwalkan saat ini. Pantau terus agenda kami.</p></div>
       ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <div className="mt-9 grid gap-5 md:grid-cols-3">
           {tournaments.map((t) => (
-            <div key={t.id} className="card flex gap-4 p-5">
-              <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center border border-line bg-surface text-center">
-                <span className="d text-lg leading-none text-navy">{t.startsAt.getDate()}</span>
-                <span className="lb !text-[0.6rem]">{MONTH[t.startsAt.getMonth()]}</span>
+            <Link key={t.id} href={`/tournaments/${t.id}`} className="card group flex flex-col p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center rounded-2xl bg-navy text-center text-white">
+                  <span className="d text-3xl">{t.startsAt.getDate()}</span><span className="mt-1 text-[10px] font-bold tracking-widest text-lime">{MONTH[t.startsAt.getMonth()]} {t.startsAt.getFullYear()}</span>
+                </div>
+                <span className={`rounded-full px-3 py-2 text-[10px] font-semibold ${t.status === 'REGISTRATION_OPEN' ? 'bg-lime/35 text-navy' : 'bg-surface text-muted'}`}>{STATUS_LABEL[t.status] ?? t.status}</span>
               </div>
-              <div className="min-w-0">
-                <p className="lb text-accent">{STATUS_LABEL[t.status] ?? t.status}</p>
-                <p className="mt-1 truncate font-display text-lg font-extrabold text-ink">{t.name}</p>
-                <p className="mt-1 text-xs text-muted">{t.location.city} &middot; {CATEGORY_LABEL[t.category] ?? t.category}</p>
-                <p className="mt-1 text-xs font-semibold text-navy">{t._count.participants} / {t.maxPlayers} Peserta</p>
-                <Link href={`/tournaments/${t.id}`} className="mt-2 inline-block text-[13px] font-bold uppercase tracking-[0.06em] text-accent">
-                  Detail Turnamen →
-                </Link>
-              </div>
-            </div>
+              <p className="lb mt-7 text-accent">{CATEGORY_LABEL[t.category] ?? t.category}</p>
+              <h3 className="mt-2 font-display text-xl font-extrabold tracking-tight text-navy">{t.name}</h3>
+              <p className="mt-4 flex items-center gap-2 text-xs text-muted"><MapPin size={14} aria-hidden="true" />{t.location.city}</p>
+              <div className="mt-auto pt-6"><div className="flex items-center justify-between border-t border-line pt-4"><p className="flex items-center gap-2 text-xs text-muted"><Users size={15} aria-hidden="true" />{t._count.participants} / {t.maxPlayers} Peserta</p><span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-navy transition group-hover:bg-lime"><ArrowUpRight size={18} aria-hidden="true" /></span></div></div>
+            </Link>
           ))}
         </div>
       )}

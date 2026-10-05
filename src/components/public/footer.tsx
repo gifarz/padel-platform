@@ -25,15 +25,16 @@ const NAV_COLUMN = [
 
 const INFO_COLUMN = [
   { href: '/news', label: 'Berita' },
-  { href: '/trainers', label: 'Pelatih' },
-  { href: '/referees', label: 'Wasit' },
+  { href: '/#tim-pendukung', label: 'Pelatih & Wasit' },
+  { href: '/register', label: 'Gabung PBPI' },
   { href: '/contact', label: 'Kontak' },
 ]
 
 export function Footer() {
   return (
-    <footer className="border-t border-navy-dark bg-navy text-white">
-      <div className="mx-auto max-w-site px-4 py-14 sm:px-8">
+    <footer className="border-t border-navy-dark bg-navy-dark text-white">
+      <div className="mx-auto max-w-site px-4 py-14 sm:px-8 lg:pt-20">
+        <div className="mb-12 flex flex-wrap items-center justify-between gap-5 border-b border-white/15 pb-9"><p className="d text-3xl sm:text-5xl">See you <span className="text-lime">on court.</span></p><Link href="/register" className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 text-2xl text-lime transition hover:bg-lime hover:text-navy" aria-label="Gabung PBPI Garut">↗</Link></div>
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <div>
             <Image src="/logo/logo-white.svg" alt="PBPI Kabupaten Garut" width={220} height={58} className="h-14 w-auto" />

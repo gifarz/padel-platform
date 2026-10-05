@@ -2,27 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
- * PBPI Kabupaten Garut design tokens — clean editorial/federation system.
- * Light mode first: white/off-white surfaces, PBPI red for emphasis, deep
- * navy for institutional weight. Kept as CSS variables (in addition to the
- * Tailwind tokens in tailwind.config.ts) per the design-system spec so raw
- * CSS and inline styles (e.g. the distribution map, added later) can read
- * them directly.
- */
+/* Shared federation colors with court-inspired surfaces and sport accents. */
 :root {
   color-scheme: light;
   --pbpi-red: #C81E2C;
   --pbpi-red-dark: #9E141F;
-  --navy: #0B2545;
-  --navy-dark: #071A33;
+  --navy: #14282D;
+  --navy-dark: #0C1B20;
+  --lime: #D8F36A;
   --background: #FFFFFF;
-  --surface: #F7F7F5;
+  --surface: #F5F6F1;
   --muted: #65707A;
   --border: #E3E3DE;
   --text: #0F1720;
   --text-muted: #65707A;
-  --header-h: 6rem; /* premium, spacious sport-federation navbar */
+  --header-h: 5.5rem;
 }
 
 html {
@@ -39,12 +33,14 @@ body {
   color: var(--text);
 }
 
+::selection { background: var(--lime); color: var(--navy-dark); }
+
 /* Section/display headings — bold, wide, geometric editorial sports type. */
 .d {
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 800;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  line-height: 1.02;
+  letter-spacing: -0.055em;
   text-transform: uppercase;
 }
 
@@ -52,8 +48,8 @@ body {
 .lb {
   font-family: var(--font-body), sans-serif;
   font-weight: 700;
-  font-size: 0.8125rem;
-  letter-spacing: 0.1em;
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -63,30 +59,53 @@ body {
 
 @layer components {
   .inp {
-    @apply w-full rounded border border-line bg-white px-4 py-2.5 text-[15px] text-ink placeholder:text-muted focus:border-navy focus:outline-none focus:ring-1 focus:ring-navy;
+    @apply w-full rounded-lg border border-line bg-white px-4 py-2.5 text-[15px] text-ink placeholder:text-muted focus:border-navy focus:outline-none focus:ring-1 focus:ring-navy;
   }
   .btn-p {
-    @apply inline-flex h-14 items-center justify-center rounded border border-accent bg-accent px-8 text-[15px] font-bold uppercase tracking-[0.04em] text-white transition hover:bg-accentDeep hover:-translate-y-px disabled:opacity-50;
+    @apply inline-flex h-14 items-center justify-center gap-3 rounded-full border border-accent bg-accent px-7 text-sm font-bold text-white transition duration-200 hover:bg-accentDeep hover:-translate-y-0.5 disabled:opacity-50;
   }
   .btn-o {
-    @apply inline-flex h-14 items-center justify-center rounded border border-white/70 bg-transparent px-8 text-[15px] font-bold uppercase tracking-[0.04em] text-white transition hover:border-white hover:-translate-y-px disabled:opacity-40;
+    @apply inline-flex h-14 items-center justify-center gap-3 rounded-full border border-white/40 bg-transparent px-7 text-sm font-bold text-white transition duration-200 hover:border-white hover:bg-white/10 hover:-translate-y-0.5 disabled:opacity-40;
   }
-  /* Whisper-quiet border, no shadow — the card style used across the public site. */
+  .btn-sport {
+    @apply inline-flex h-14 items-center justify-center gap-3 rounded-full border border-lime bg-lime px-7 text-sm font-bold text-navy-dark transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:border-white;
+  }
   .card {
-    @apply rounded border border-line bg-white transition-colors hover:border-navy/40;
+    @apply rounded-2xl border border-line bg-white transition duration-200 hover:border-navy/25 hover:shadow-card;
   }
   .th { @apply px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-[0.08em] text-muted; }
   .td { @apply px-4 py-3; }
   /* Consistent section container: generous spacing, capped content width. */
   .section { @apply mx-auto max-w-site px-4 py-20 sm:px-8 md:py-24 lg:py-28; }
-  .section-title { @apply lb text-navy; }
+  .section-title { @apply lb flex items-center gap-3 text-navy; }
+  .section-title::before { content: ''; @apply h-2 w-2 rounded-full bg-accent; }
+  .section-link { @apply inline-flex shrink-0 items-center gap-2 text-sm font-bold text-navy transition hover:text-accent; }
+  .empty-state { @apply mt-8 rounded-2xl border border-dashed border-navy/20 bg-surface px-6 py-12 text-center text-sm leading-relaxed text-muted; }
 }
+
+.court-lines {
+  background-image: linear-gradient(to right, rgb(255 255 255 / 5%) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 5%) 1px, transparent 1px);
+  background-size: 100px 100px;
+}
+
+.hero-outline {
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 75%);
+  paint-order: stroke fill;
+  color: var(--navy-dark);
+}
+
+@media (max-width: 639px) { :root { --header-h: 4.5rem; } }
 
 @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 .reveal { opacity: 0; transform: translateY(20px); animation: fade-up .7s cubic-bezier(.2,.8,.2,1) forwards; }
 
 /* Focus visibility for keyboard navigation (accessibility requirement). */
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid var(--navy);
-  outline-offset: 2px;
+  outline: 3px solid #7B951E;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .reveal { opacity: 1; transform: none; }
 }

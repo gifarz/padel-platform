@@ -7,7 +7,7 @@ export async function StaffPreview() {
   const r = referees.slice(0, 3)
 
   return (
-    <section className="section">
+    <section id="tim-pendukung" className="section">
       <div className="grid gap-10 sm:grid-cols-2">
         <div>
           <p className="section-title">Pelatih</p>
@@ -21,7 +21,7 @@ export async function StaffPreview() {
               </li>
             ))}
           </ul>
-          <Link href="/trainers" className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-accent">Lihat Semua Pelatih →</Link>
+          <Link href="/contact" className="section-link mt-5">Hubungi Kami untuk Info Pelatih ↗</Link>
         </div>
 
         <div>
@@ -36,7 +36,7 @@ export async function StaffPreview() {
               </li>
             ))}
           </ul>
-          <Link href="/referees" className="mt-4 inline-block text-xs font-bold uppercase tracking-widest text-accent">Lihat Semua Wasit →</Link>
+          <Link href="/contact" className="section-link mt-5">Hubungi Kami untuk Info Wasit ↗</Link>
         </div>
       </div>
     </section>
