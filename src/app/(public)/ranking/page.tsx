@@ -13,7 +13,7 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
 
   return (
     <div>
-      <PageBanner eyebrow="Peringkat" title="Peringkat Pemain PBPI" description="Peringkat resmi seluruh pemain terdaftar, berdasarkan sistem rating ELO PBPI Kabupaten Garut." />
+      <PageBanner eyebrow="Peringkat" title="Peringkat Pemain PBPI" description="Peringkat resmi seluruh pemain terdaftar, berdasarkan sistem poin ELO PBPI Kabupaten Garut." />
 
       <div className="section">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter kecamatan">

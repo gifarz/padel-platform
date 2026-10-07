@@ -28,19 +28,19 @@ export default async function AdminAthleteDetail({
       </div>
 
       <div className="grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
-        <div className="bg-bg p-5"><p className="d text-3xl text-accent">{fmtNum(athlete.rating)}</p><p className="lb">Rating</p></div>
-        <div className="bg-bg p-5"><p className="d text-3xl">{fmtNum(athlete.peakRating)}</p><p className="lb">Puncak rating</p></div>
+        <div className="bg-bg p-5"><p className="d text-3xl text-accent">{fmtNum(athlete.rating)}</p><p className="lb">Poin</p></div>
+        <div className="bg-bg p-5"><p className="d text-3xl">{fmtNum(athlete.peakRating)}</p><p className="lb">Puncak poin</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl">{matchCount}</p><p className="lb">Pertandingan</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl">{athlete.wins}/{athlete.losses}</p><p className="lb">Menang/Kalah</p></div>
       </div>
 
-      <h2 className="d mt-10 text-2xl">Riwayat rating</h2>
+      <h2 className="d mt-10 text-2xl">Riwayat poin</h2>
       <div className="mt-4 divide-y divide-line border-y border-line">
-        {history.length === 0 && <p className="py-6 text-sm text-muted">Belum ada riwayat perubahan rating.</p>}
+        {history.length === 0 && <p className="py-6 text-sm text-muted">Belum ada riwayat perubahan poin.</p>}
         {history.map((h) => (
           <div key={h.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
             <div>
-              <p className="text-sm">{h.reason === 'MATCH' ? 'Hasil pertandingan' : h.reason === 'CORRECTION' ? 'Koreksi hasil' : h.reason === 'INITIAL' ? 'Rating awal' : 'Penyesuaian admin'}</p>
+              <p className="text-sm">{h.reason === 'MATCH' ? 'Hasil pertandingan' : h.reason === 'CORRECTION' ? 'Koreksi hasil' : h.reason === 'INITIAL' ? 'Poin awal' : 'Penyesuaian admin'}</p>
               <p className="text-xs text-muted">{fmtDate(h.createdAt)} · {h.ratingBefore} → {h.ratingAfter}{h.note ? ` · ${h.note}` : ''}</p>
             </div>
             <span className={`font-display text-lg ${h.ratingDelta > 0 ? 'text-accent' : h.ratingDelta < 0 ? 'text-red-400' : 'text-muted'}`}>

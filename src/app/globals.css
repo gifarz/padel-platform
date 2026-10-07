@@ -96,6 +96,24 @@ body {
 
 @media (max-width: 639px) { :root { --header-h: 4.5rem; } }
 
+/* ── Bagan pengurus (src/components/public/org-chart.tsx) ───────────────── */
+.org-stem { height: 1.75rem; border-left: 2px solid #C9CDC7; }
+.org-row { display: flex; justify-content: center; gap: 0; padding-top: 0; }
+.org-item { position: relative; padding: 1.75rem 0.5rem 0; }
+.org-item::before { content: ''; position: absolute; top: 0; left: 50%; height: 1.75rem; border-left: 2px solid #C9CDC7; }
+.org-item::after { content: ''; position: absolute; top: 0; left: 0; right: 0; border-top: 2px solid #C9CDC7; }
+.org-item:first-child::after { left: 50%; }
+.org-item:last-child::after { right: 50%; }
+.org-item:only-child::after { display: none; }
+.org-row--top > .org-item { padding-top: 0; }
+.org-row--top > .org-item::before, .org-row--top > .org-item::after { display: none; }
+@media (max-width: 767px) {
+  /* Small screens: stack the tiers and drop the horizontal connectors. */
+  .org-row { flex-direction: column; align-items: center; }
+  .org-item { padding: 0.5rem 0; }
+  .org-item::before, .org-item::after { display: none; }
+}
+
 @keyframes fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 .reveal { opacity: 0; transform: translateY(20px); animation: fade-up .7s cubic-bezier(.2,.8,.2,1) forwards; }
 

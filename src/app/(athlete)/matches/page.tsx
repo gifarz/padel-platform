@@ -39,7 +39,7 @@ export default async function MatchesPage() {
       <div className="mt-12 border border-line bg-surface p-6">
         <p className="lb">Alur pertandingan</p>
         <p className="mt-2 text-sm text-muted">
-          Ajukan tantangan → lawan terima → main → input skor → hasil diverifikasi admin/wasit → rating diperbarui otomatis.
+          Ajukan tantangan → lawan terima → main → input skor → hasil diverifikasi admin/wasit → poin diperbarui otomatis.
         </p>
       </div>
     </div>

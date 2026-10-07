@@ -23,7 +23,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
           <div>
             {club.isVerified && <p className="lb text-red-300">Terverifikasi ✓</p>}
             <h1 className="d mt-2 text-4xl sm:text-5xl">{club.name}</h1>
-            <p className="mt-1 text-sm text-white/70">{club.district?.name ?? '-'} &middot; {club.members.length} anggota</p>
+            <p className="mt-1 text-sm text-white/70">{club.district?.name ?? '-'} &middot; {club.members.length} atlet</p>
           </div>
         </div>
       </div>
@@ -46,18 +46,34 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
           </ul>
         </div>
 
-        <div>
-          <p className="section-title">Anggota</p>
-          <div className="mt-3 divide-y divide-line border-y border-line">
-            {club.members.length === 0 && <p className="py-6 text-sm text-muted">Belum ada anggota terdaftar.</p>}
-            {club.members.map((m, i) => (
-              <Link key={m.id} href={`/profile/${m.username}`} className="flex items-center gap-3 py-3 hover:bg-surface">
-                <span className="d w-6 text-muted">{i + 1}</span>
-                <span className="flex-1 text-sm font-semibold text-ink">{m.name}</span>
-                <span className="d text-sm text-navy">{fmtNum(m.rating)}</span>
-              </Link>
-            ))}
-          </div>
+        <div className="min-w-0">
+          <p className="section-title">Daftar Atlet</p>
+          {club.members.length === 0 ? (
+            <p className="mt-3 border-y border-line py-6 text-sm text-muted">Belum ada atlet terdaftar.</p>
+          ) : (
+            <div className="mt-3 overflow-x-auto border-y border-line">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-line text-left">
+                    <th className="th w-12">#</th>
+                    <th className="th">Atlet</th>
+                    <th className="th text-right">Poin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {club.members.map((m, i) => (
+                    <tr key={m.id} className="border-b border-line transition-colors last:border-0 hover:bg-surface">
+                      <td className="td d text-muted">{i + 1}</td>
+                      <td className="td">
+                        <Link href={`/profile/${m.username}`} className="block font-semibold text-ink hover:text-accent">{m.name}</Link>
+                      </td>
+                      <td className="td text-right font-bold tabular-nums text-navy">{fmtNum(m.rating)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,20 +1,24 @@
 'use client'
-import { useActionState } from 'react'
+import { useState } from 'react'
 import { createMemberAction } from '@/server/actions/organization'
-import type { FormState } from '@/server/form-state'
+import { useActionForm } from './use-action-form'
+import { ImageUploadField } from './image-upload-field'
 
 export function CreateMemberForm() {
-  const [state, action, pending] = useActionState<FormState, FormData>(createMemberAction, undefined)
+  const [photoUrl, setPhotoUrl] = useState('')
+  const { state, pending, formRef, onSubmit } = useActionForm(createMemberAction, () => setPhotoUrl(''))
   return (
-    <form action={action} className="mt-4 grid gap-3 border border-line bg-surface p-5 sm:grid-cols-2">
+    <form ref={formRef} onSubmit={onSubmit} className="mt-4 grid gap-3 border border-line bg-surface p-5 sm:grid-cols-2">
       <input name="name" placeholder="Nama lengkap" required className="inp" />
-      <input name="position" placeholder="Jabatan (cth. Ketua, Anggota)" required className="inp" />
-      <input name="division" placeholder="Divisi (opsional)" className="inp" />
-      <input name="sortOrder" type="number" placeholder="Urutan tampil" className="inp" />
-      <input name="photoUrl" placeholder="URL foto (opsional)" className="inp sm:col-span-2" />
+      <input name="position" placeholder="Jabatan (cth. Ketua, Wakil Ketua, Anggota)" required className="inp" />
+      <input name="division" placeholder="Divisi / bidang (opsional)" className="inp" />
+      <input name="sortOrder" type="number" placeholder="Urutan tampil (kecil = lebih dulu)" className="inp" />
+      <div className="sm:col-span-2">
+        <ImageUploadField name="photoUrl" label="Foto pengurus" folder="organization" value={photoUrl} onChange={setPhotoUrl} shape="logo" />
+      </div>
       <button disabled={pending} className="btn-p sm:col-span-2 sm:w-fit">{pending ? 'Menyimpan…' : 'Tambah pengurus'}</button>
-      {state?.error && <p className="text-xs text-accent sm:col-span-2">{state.error}</p>}
-      {state?.ok && <p className="text-xs text-accent sm:col-span-2">{state.ok}</p>}
+      {state?.error && <p role="alert" className="text-xs text-accent sm:col-span-2">{state.error}</p>}
+      {state?.ok && <p role="status" className="text-xs text-accent sm:col-span-2">{state.ok}</p>}
     </form>
   )
 }

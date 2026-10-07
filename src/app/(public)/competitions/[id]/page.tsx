@@ -40,7 +40,7 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
 
       {(c.minRating || c.maxRating) && (
         <p className="mt-4 text-xs text-muted">
-          Syarat rating: {c.minRating ? `minimal ${fmtNum(c.minRating)}` : ''}{c.minRating && c.maxRating ? ', ' : ''}{c.maxRating ? `maksimal ${fmtNum(c.maxRating)}` : ''}
+          Syarat poin: {c.minRating ? `minimal ${fmtNum(c.minRating)}` : ''}{c.minRating && c.maxRating ? ', ' : ''}{c.maxRating ? `maksimal ${fmtNum(c.maxRating)}` : ''}
         </p>
       )}
 
@@ -61,7 +61,7 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
         {c.participants.map((p) => (
           <div key={p.id} className="flex items-center justify-between py-3">
             <p className="font-display text-lg uppercase">{p.athlete.user.name}</p>
-            <p className="text-sm text-muted">{fmtNum(p.athlete.rating)} pts</p>
+            <p className="text-sm text-muted">{fmtNum(p.athlete.rating)} poin</p>
           </div>
         ))}
       </div>

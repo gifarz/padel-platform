@@ -5,7 +5,7 @@ import { UPLOAD_FOLDERS, type UploadFolder } from '@/lib/uploads'
 
 export const runtime = 'nodejs'
 
-/** Admin-only image upload. multipart/form-data: `file` (image) + `folder` (news | clubs). */
+/** Admin-only image upload. multipart/form-data: `file` (image) + `folder` (news | clubs | organization). */
 export async function POST(req: Request) {
   const session = await auth()
   if (session?.user?.role !== 'SUPER_ADMIN') {

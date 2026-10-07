@@ -5,7 +5,7 @@ import { fmtNum } from '@/lib/format'
 
 const SORTS = [
   { value: 'match', label: 'Level match terbaik' },
-  { value: 'rating', label: 'Rating' },
+  { value: 'rating', label: 'Poin' },
   { value: 'active', label: 'Paling aktif' },
 ] as const
 

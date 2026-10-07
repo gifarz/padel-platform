@@ -10,6 +10,11 @@ export function CreateLocationForm() {
       <input name="city" placeholder="Kota / kabupaten" required className="inp" />
       <input name="province" placeholder="Provinsi" defaultValue="Jawa Barat" className="inp" />
       <input name="address" placeholder="Alamat (opsional)" className="inp" />
+      <label className="grid gap-1">
+        <span className="text-xs font-bold uppercase tracking-widest text-muted">Jumlah lapangan</span>
+        <input name="courtCount" type="number" min={1} max={50} step={1} defaultValue={1} required placeholder="cth. 4" className="inp" />
+      </label>
+      <div className="hidden sm:block" />
       <input name="lat" placeholder="Latitude (opsional)" className="inp" />
       <input name="lng" placeholder="Longitude (opsional)" className="inp" />
       <button disabled={pending} className="btn-p sm:col-span-2 sm:w-fit">{pending ? 'Menambahkan…' : 'Tambah lokasi'}</button>

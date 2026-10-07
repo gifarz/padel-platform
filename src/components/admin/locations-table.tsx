@@ -12,7 +12,7 @@ export interface LocationRow {
   address: string | null
   lat: number | null
   lng: number | null
-  courts: { id: string }[]
+  courts: { id: string; isActive: boolean }[]
   _count: { competitions: number }
 }
 
@@ -27,9 +27,13 @@ function EditRow({ loc, onDone }: { loc: LocationRow; onDone: () => void }) {
           <input name="city" defaultValue={loc.city} placeholder="Kota" required className="inp" />
           <input name="province" defaultValue={loc.province} placeholder="Provinsi" className="inp" />
           <input name="address" defaultValue={loc.address ?? ''} placeholder="Alamat" className="inp sm:col-span-2" />
-          <input name="lat" defaultValue={loc.lat ?? ''} placeholder="Latitude (opsional)" className="inp" />
-          <input name="lng" defaultValue={loc.lng ?? ''} placeholder="Longitude (opsional)" className="inp" />
-          <div className="flex items-center gap-3 sm:col-span-2">
+          <label className="grid gap-1">
+            <span className="text-[0.65rem] font-bold uppercase tracking-widest text-muted">Jumlah lapangan</span>
+            <input name="courtCount" type="number" min={0} max={50} step={1} required defaultValue={loc.courts.filter((c) => c.isActive).length} className="inp" />
+          </label>
+          <input name="lat" defaultValue={loc.lat ?? ''} placeholder="Latitude (opsional)" className="inp self-end" />
+          <input name="lng" defaultValue={loc.lng ?? ''} placeholder="Longitude (opsional)" className="inp self-end" />
+          <div className="flex items-center gap-3 self-end">
             <button disabled={pending} className="btn-p h-10 px-5 text-xs">{pending ? 'Menyimpan…' : 'Simpan'}</button>
             <button type="button" onClick={onDone} className="text-xs font-bold uppercase tracking-widest text-muted hover:text-ink">Batal</button>
           </div>
@@ -60,7 +64,7 @@ export function LocationsTable({ locations }: { locations: LocationRow[] }) {
               <tr key={l.id} className="border-b border-line last:border-0 hover:bg-surface">
                 <td className="td font-display text-base">{l.name}</td>
                 <td className="td text-muted">{l.city}, {l.province}</td>
-                <td className="td text-muted">{l.courts.length}</td>
+                <td className="td text-muted">{l.courts.filter((c) => c.isActive).length}</td>
                 <td className="td text-muted">{l._count.competitions}</td>
                 <td className="td text-right">
                   <div className="flex justify-end gap-3">

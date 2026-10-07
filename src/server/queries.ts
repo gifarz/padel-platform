@@ -127,6 +127,37 @@ export async function getAthletesPage(query: string, page: number, filters: Athl
   }
 }
 
+/** Admin variant of getAthletesPage: includes the editable fields (phone, username, gender, district, club). */
+export async function getAthletesAdminPage(query: string, page: number) {
+  const where: Prisma.AthleteProfileWhereInput = query
+    ? { OR: [
+        { user: { name: { contains: query, mode: 'insensitive' } } },
+        { username: { contains: query, mode: 'insensitive' } },
+        { city: { contains: query, mode: 'insensitive' } },
+        { district: { name: { contains: query, mode: 'insensitive' } } },
+      ] }
+    : {}
+  const [rows, total] = await Promise.all([
+    db.athleteProfile.findMany({
+      where, orderBy: { rating: 'desc' }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE,
+      include: { user: { select: { name: true, phone: true, isActive: true } }, district: { select: { name: true } }, club: { select: { name: true } } },
+    }),
+    db.athleteProfile.count({ where }),
+  ])
+  return {
+    rows: rows.map((a) => ({
+      ...toCard(a),
+      phone: a.user.phone,
+      gender: a.gender,
+      districtId: a.districtId,
+      clubId: a.clubId,
+      isActive: a.user.isActive,
+    })),
+    total,
+    pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+  }
+}
+
 /**
  * Most recent MATCH/CORRECTION delta per athlete — used as the ranking
  * page's up/down indicator. Done as one query + in-memory grouping rather
@@ -552,4 +583,57 @@ export async function getUpcomingTournaments(take = 3) {
     take,
     include: { location: true, _count: { select: { participants: { where: { status: { in: ['REGISTERED', 'CONFIRMED'] } } } } } },
   })
+}
+
+/** All matches for the admin CRUD table (newest first), optionally filtered by status. */
+export async function getMatchesAdmin(status?: Prisma.MatchWhereInput['status'], take = 100) {
+  const matches = await db.match.findMany({
+    where: status ? { status } : undefined,
+    orderBy: [{ scheduledAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
+    take,
+    include: {
+      participants: { include: { athlete: { include: { user: { select: { name: true } } } } } },
+      court: { include: { location: { select: { name: true } } } },
+      referee: { include: { user: { select: { name: true } } } },
+      trainer: { include: { user: { select: { name: true } } } },
+      competition: { select: { name: true } },
+    },
+  })
+  return matches.map((m) => {
+    const team = (t: 'A' | 'B') => m.participants.filter((p) => p.team === t).map((p) => ({ id: p.athleteId, name: p.athlete.user.name }))
+    return {
+      id: m.id,
+      status: m.status,
+      teamA: team('A'),
+      teamB: team('B'),
+      sets: m.sets as number[][] | null,
+      winnerTeam: m.winnerTeam,
+      scheduledAt: m.scheduledAt ? m.scheduledAt.toISOString() : null,
+      courtId: m.courtId,
+      courtLabel: m.court ? `${m.court.name} · ${m.court.location.name}` : null,
+      refereeId: m.refereeId,
+      refereeName: m.referee?.user.name ?? null,
+      trainerId: m.trainerId,
+      trainerName: m.trainer?.user.name ?? null,
+      competitionName: m.competition?.name ?? null,
+      isBracket: m.competitionId != null && m.round != null,
+      cancelReason: m.cancelReason,
+    }
+  })
+}
+
+/** Dropdown options for the admin match form. */
+export async function getMatchFormOptions() {
+  const [athletes, courts, referees, trainers] = await Promise.all([
+    db.athleteProfile.findMany({ orderBy: { user: { name: 'asc' } }, select: { id: true, username: true, user: { select: { name: true } } } }),
+    db.court.findMany({ where: { isActive: true }, orderBy: [{ location: { name: 'asc' } }, { name: 'asc' }], select: { id: true, name: true, location: { select: { name: true } } } }),
+    db.refereeProfile.findMany({ where: { status: 'ACTIVE' }, orderBy: { user: { name: 'asc' } }, select: { id: true, user: { select: { name: true } } } }),
+    db.trainerProfile.findMany({ where: { status: 'ACTIVE' }, orderBy: { user: { name: 'asc' } }, select: { id: true, user: { select: { name: true } } } }),
+  ])
+  return {
+    athletes: athletes.map((a) => ({ id: a.id, label: `${a.user.name} (@${a.username})` })),
+    courts: courts.map((c) => ({ id: c.id, label: `${c.name} · ${c.location.name}` })),
+    referees: referees.map((r) => ({ id: r.id, label: r.user.name })),
+    trainers: trainers.map((t) => ({ id: t.id, label: t.user.name })),
+  }
 }

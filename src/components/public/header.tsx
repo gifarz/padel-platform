@@ -50,6 +50,11 @@ export function Header() {
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+  // On the landing page the hero photo runs under the navbar, so until the user
+  // scrolls the bar is transparent with light text and the white logo.
+  const overHero = pathname === '/' && !scrolled && !open
+  const linkTone = overHero ? 'text-white/85' : 'text-navy/70'
+  const hoverTone = overHero ? 'hover:text-lime' : 'hover:text-accent'
   const menuButtonRef = useRef<HTMLButtonElement>(null)
   const closeMenu = useCallback(() => {
     setOpen(false)
@@ -76,13 +81,15 @@ export function Header() {
       className={`fixed inset-x-0 top-0 z-50 h-[var(--header-h)] border-b transition-colors duration-300 ${
         scrolled || open
           ? 'border-line bg-white/95 shadow-sm backdrop-blur-xl'
-          : 'border-transparent bg-surface'
+          : overHero
+            ? 'border-transparent bg-transparent'
+            : 'border-transparent bg-surface'
       }`}
     >
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-full focus:bg-lime focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-navy">Langsung ke konten</a>
       <div className="mx-auto flex h-full max-w-site items-center justify-between gap-4 px-4 sm:px-8">
         <Link href="/" className="flex items-center gap-2" aria-label="Beranda PBPI Kabupaten Garut">
-          <Image src="/logo/logo-black.svg" alt="PBPI Kabupaten Garut" width={200} height={54} className="h-10 w-auto sm:h-12" priority />
+          <Image src={overHero ? '/logo/logo-white.svg' : '/logo/logo-black.svg'} alt="PBPI Kabupaten Garut" width={200} height={54} className="h-10 w-auto sm:h-12" priority />
         </Link>
 
         <nav aria-label="Navigasi utama" className="hidden h-full items-stretch text-[13px] font-semibold lg:flex">
@@ -91,7 +98,7 @@ export function Header() {
               <div key={item.label} className="group relative flex h-full items-center">
                 <Link
                   href={item.href}
-                  className={`flex h-full items-center gap-1.5 px-3 transition group-hover:text-accent group-focus-within:text-accent ${item.children.some((child) => pathname.startsWith(child.href)) ? 'text-accent' : 'text-navy/70'}`}
+                  className={`flex h-full items-center gap-1.5 px-3 transition ${overHero ? 'group-hover:text-lime group-focus-within:text-lime' : 'group-hover:text-accent group-focus-within:text-accent'} ${item.children.some((child) => pathname.startsWith(child.href)) ? (overHero ? 'text-lime' : 'text-accent') : linkTone}`}
                 >
                   {item.label}
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden="true" className="transition group-hover:rotate-180">
@@ -115,7 +122,7 @@ export function Header() {
                 </div>
               </div>
             ) : (
-              <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className={`relative flex h-full items-center px-3 transition hover:text-accent ${pathname === item.href ? 'text-accent after:absolute after:bottom-5 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-accent' : 'text-navy/70'}`}>
+              <Link key={item.href} href={item.href} aria-current={pathname === item.href ? 'page' : undefined} className={`relative flex h-full items-center px-3 transition ${hoverTone} ${pathname === item.href ? `${overHero ? 'text-lime after:bg-lime' : 'text-accent after:bg-accent'} after:absolute after:bottom-5 after:left-3 after:right-3 after:h-0.5 after:rounded-full` : linkTone}`}>
                 {item.label}
               </Link>
             )
@@ -123,7 +130,7 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-5 text-[13px] font-semibold lg:flex">
-          <Link href="/login" className="text-navy/70 hover:text-accent">Masuk</Link>
+          <Link href="/login" className={`${linkTone} ${hoverTone}`}>Masuk</Link>
           <Link href="/register" className="btn-p h-11 px-5 text-[13px]">Gabung Sekarang <ArrowUpRight size={16} aria-hidden="true" /></Link>
         </div>
 
@@ -134,7 +141,7 @@ export function Header() {
           aria-label="Buka menu navigasi"
           aria-expanded={open}
           aria-controls="mobile-navigation"
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-line text-navy lg:hidden"
+          className={`flex h-11 w-11 items-center justify-center rounded-full border lg:hidden ${overHero ? 'border-white/40 text-white' : 'border-line text-navy'}`}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="round" />

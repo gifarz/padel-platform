@@ -40,7 +40,7 @@ export default async function AdminCompetitionDetail({ params }: { params: Promi
         <table className="w-full min-w-[600px] text-sm">
           <thead>
             <tr className="border-b border-line text-left text-[0.68rem] font-bold uppercase tracking-widest text-muted">
-              <th className="th">Pasangan</th><th className="th">Rating</th><th className="th">Status</th>
+              <th className="th">Pasangan</th><th className="th">Poin</th><th className="th">Status</th>
             </tr>
           </thead>
           <tbody>

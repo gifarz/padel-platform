@@ -30,7 +30,7 @@ export function MatchRow({ id, label, date, court, status, delta, canAccept, can
         </div>
         <div className="flex items-center gap-3">
           {delta != null && (
-            <span className={`font-display text-lg ${delta > 0 ? 'text-accent' : 'text-red-400'}`}>{delta > 0 ? '+' : ''}{delta} pts</span>
+            <span className={`font-display text-lg ${delta > 0 ? 'text-accent' : 'text-red-400'}`}>{delta > 0 ? '+' : ''}{delta} poin</span>
           )}
           <StatusBadge status={status} />
           {canAccept && (

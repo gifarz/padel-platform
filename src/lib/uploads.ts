@@ -3,7 +3,7 @@
  * Files themselves live on disk under UPLOAD_DIR and are served by
  * /api/uploads/[...path] — see src/server/uploads.ts.
  */
-export const UPLOAD_FOLDERS = ['news', 'clubs'] as const
+export const UPLOAD_FOLDERS = ['news', 'clubs', 'organization'] as const
 export type UploadFolder = (typeof UPLOAD_FOLDERS)[number]
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024

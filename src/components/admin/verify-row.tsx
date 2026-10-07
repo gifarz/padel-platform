@@ -39,7 +39,7 @@ export function VerifyRow({ id, teamA, teamB, sets, winnerTeam }: Props) {
               <button type="button" onClick={() => setCorrecting((c) => !c)} className="btn-o">Koreksi</button>
             </form>
           ) : (
-            <span className="text-xs font-bold uppercase tracking-widest text-accent">Rating diperbarui ✓</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-accent">Poin diperbarui ✓</span>
           )}
         </div>
       </div>

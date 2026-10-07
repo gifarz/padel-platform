@@ -12,3 +12,12 @@ export const parseLocalDateTime = (v?: FormDataEntryValue | null) => {
   const d = new Date(`${v}:00+07:00`)
   return Number.isNaN(d.getTime()) ? null : d
 }
+/** Date → value for <input type="datetime-local">, in Jakarta time (inverse of parseLocalDateTime). */
+export const toLocalDateTimeInput = (d?: Date | null) => {
+  if (!d) return ''
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+      .formatToParts(d).map((x) => [x.type, x.value]),
+  )
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`
+}

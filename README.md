@@ -2,6 +2,19 @@
 
 Next.js 15 (App Router) + TypeScript + Tailwind + Prisma + NextAuth.
 
+## Pembaruan terbaru
+
+- **Rating → Poin** — seluruh teks yang tampil di UI (admin, atlet, publik, pesan error) sekarang memakai istilah "Poin". Nama kolom database & kode (`rating`, `peakRating`, `RatingHistory`) sengaja tidak diubah supaya tidak perlu migrasi.
+- **CRUD admin lengkap** untuk Atlet, Wasit, Pelatih, Pengurus, dan Pertandingan (tambah, ubah inline, hapus).
+  - Atlet yang sudah punya pertandingan/riwayat poin/pendaftaran kompetisi tidak bisa dihapus (hanya dinonaktifkan) agar peringkat tetap utuh.
+  - Pertandingan: form pakai dropdown (atlet, lapangan, wasit, pelatih), bukan lagi mengetik ID. Setelah hasil dikirim/diverifikasi, susunan pemain & skor dikunci; pertandingan terverifikasi dan pertandingan bagan kompetisi tidak bisa dihapus.
+  - Admin bisa mengisi skor dari form ubah pertandingan; hasilnya masuk antrean verifikasi.
+- **Pengurus**: unggah foto (folder `organization`) + bagan struktur organisasi di `/organization` (pratinjau juga di `/admin/organization`). Bagan disusun otomatis: Ketua → Wakil Ketua/Sekretaris/Bendahara → kolom per divisi.
+- **Lokasi**: input "Jumlah lapangan" di form tambah & ubah. Sistem membuat/menonaktifkan data `Court` ("Lapangan 1…N"); lapangan yang sudah dipakai pertandingan/kompetisi dinonaktifkan, bukan dihapus.
+- **Landing page**: hero full-background dengan navbar transparan di atas foto (berubah putih saat di-scroll).
+- **Detail klub**: daftar atlet berbentuk tabel dengan kolom Poin.
+- Tidak ada perubahan skema database — tidak perlu migrasi baru.
+
 ## Status: tersambung ke database sungguhan
 
 Berbeda dari draf sebelumnya, hampir semua halaman sekarang mengambil data lewat

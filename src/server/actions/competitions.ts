@@ -22,8 +22,8 @@ export async function registerForCompetitionAction(_prev: FormState, formData: F
 
   if (competition.minRating || competition.maxRating) {
     const athlete = await db.athleteProfile.findUniqueOrThrow({ where: { id: athleteId } })
-    if (competition.minRating && athlete.rating < competition.minRating) return { error: 'Rating kamu di bawah syarat minimum kompetisi ini.' }
-    if (competition.maxRating && athlete.rating > competition.maxRating) return { error: 'Rating kamu di atas batas maksimum kompetisi ini.' }
+    if (competition.minRating && athlete.rating < competition.minRating) return { error: 'Poin kamu di bawah syarat minimum kompetisi ini.' }
+    if (competition.maxRating && athlete.rating > competition.maxRating) return { error: 'Poin kamu di atas batas maksimum kompetisi ini.' }
   }
 
   const confirmedCount = await db.competitionParticipant.count({

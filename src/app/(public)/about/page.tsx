@@ -3,7 +3,7 @@ import { PageBanner } from '@/components/public/page-banner'
 const MISI = [
   'Membina dan mengembangkan atlet padel di seluruh kecamatan Kabupaten Garut.',
   'Menyelenggarakan turnamen dan kompetisi padel yang terstruktur dan berjenjang.',
-  'Menyediakan sistem peringkat (rating) yang transparan dan berbasis prestasi.',
+  'Menyediakan sistem peringkat (poin) yang transparan dan berbasis prestasi.',
   'Melatih dan mensertifikasi pelatih serta wasit padel yang kompeten.',
   'Membangun dan memfasilitasi jejaring klub padel di tingkat kabupaten.',
 ]

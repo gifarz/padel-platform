@@ -25,7 +25,7 @@ export default async function DashboardPage() {
 
         <div className="mt-8 grid gap-1 sm:grid-cols-[1.3fr_1fr_1fr]">
           <div className="border border-line bg-surface p-6">
-            <p className="lb">Rating saat ini</p>
+            <p className="lb">Poin saat ini</p>
             <p className="d text-6xl text-accent sm:text-7xl">{fmtNum(me.rating)}</p>
             <p className="mt-1 text-sm font-bold uppercase tracking-widest">{level.name}</p>
           </div>
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
                 <p className="d text-4xl text-accent">{r.match}%</p>
                 <p className="lb">Level match</p>
                 <p className="mt-3 font-display text-2xl uppercase">{r.name}</p>
-                <p className="text-sm text-muted">{r.city} · {fmtNum(r.rating)} pts</p>
+                <p className="text-sm text-muted">{r.city} · {fmtNum(r.rating)} poin</p>
                 <Link href={`/profile/${r.username}`} className="mt-4 inline-block border border-ink px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-ink hover:text-bg">
                   Tantang →
                 </Link>

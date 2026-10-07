@@ -76,3 +76,85 @@ export async function setRefereeStatusAction(id: string, status: 'ACTIVE' | 'INA
   revalidatePath('/admin/referees')
   revalidatePublicSite()
 }
+
+/** Shared by trainer/referee edit: validates name + phone and updates the User row. */
+async function updateStaffUser(userId: string, formData: FormData) {
+  const name = String(formData.get('name') ?? '').trim()
+  const rawPhone = String(formData.get('phone') ?? '').trim()
+  if (!name || !rawPhone) throw new Error('Nama dan nomor HP wajib diisi.')
+  const phone = normalizeIndonesianPhone(rawPhone)
+  if (!phone) throw new Error('Nomor HP tidak valid.')
+  const owner = await db.user.findUnique({ where: { phone }, select: { id: true } })
+  if (owner && owner.id !== userId) throw new Error('Nomor HP sudah dipakai akun lain.')
+  return { name, phone }
+}
+
+const districtOrNull = (formData: FormData) => String(formData.get('districtId') ?? '').trim() || null
+
+export async function updateTrainerAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin()
+  try {
+    const id = String(formData.get('id') ?? '')
+    const trainer = await db.trainerProfile.findUnique({ where: { id }, select: { userId: true } })
+    if (!trainer) return { error: 'Pelatih tidak ditemukan.' }
+    const user = await updateStaffUser(trainer.userId, formData)
+    const specialties = String(formData.get('specialties') ?? '').split(',').map((s) => s.trim()).filter(Boolean)
+    const yearsExp = Math.max(0, Number(formData.get('yearsExp') ?? 0) || 0)
+    const priceRaw = String(formData.get('sessionPrice') ?? '').trim()
+    const sessionPrice = priceRaw ? Math.max(0, Number(priceRaw) || 0) : null
+
+    await db.$transaction([
+      db.user.update({ where: { id: trainer.userId }, data: user }),
+      db.trainerProfile.update({ where: { id }, data: { districtId: districtOrNull(formData), specialties, yearsExp, sessionPrice } }),
+    ])
+    revalidatePath('/admin/trainers')
+    revalidatePublicSite()
+    return { ok: `Data pelatih "${user.name}" diperbarui.` }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Gagal memperbarui pelatih.' }
+  }
+}
+
+export async function deleteTrainerAction(id: string) {
+  await requireAdmin()
+  const trainer = await db.trainerProfile.findUnique({ where: { id }, select: { userId: true } })
+  if (!trainer) throw new Error('Pelatih tidak ditemukan.')
+  // Cascades to the profile; matches keep existing, their trainer is just cleared (ON DELETE SET NULL).
+  await db.user.delete({ where: { id: trainer.userId } })
+  revalidatePath('/admin/trainers')
+  revalidatePath('/admin/matches')
+  revalidatePublicSite()
+}
+
+export async function updateRefereeAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin()
+  try {
+    const id = String(formData.get('id') ?? '')
+    const referee = await db.refereeProfile.findUnique({ where: { id }, select: { userId: true } })
+    if (!referee) return { error: 'Wasit tidak ditemukan.' }
+    const certification = String(formData.get('certification') ?? '').trim()
+    if (!certification) return { error: 'Isi sertifikasi wasit.' }
+    const user = await updateStaffUser(referee.userId, formData)
+    const yearsExp = Math.max(0, Number(formData.get('yearsExp') ?? 0) || 0)
+
+    await db.$transaction([
+      db.user.update({ where: { id: referee.userId }, data: user }),
+      db.refereeProfile.update({ where: { id }, data: { districtId: districtOrNull(formData), certification, yearsExp } }),
+    ])
+    revalidatePath('/admin/referees')
+    revalidatePublicSite()
+    return { ok: `Data wasit "${user.name}" diperbarui.` }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Gagal memperbarui wasit.' }
+  }
+}
+
+export async function deleteRefereeAction(id: string) {
+  await requireAdmin()
+  const referee = await db.refereeProfile.findUnique({ where: { id }, select: { userId: true } })
+  if (!referee) throw new Error('Wasit tidak ditemukan.')
+  await db.user.delete({ where: { id: referee.userId } })
+  revalidatePath('/admin/referees')
+  revalidatePath('/admin/matches')
+  revalidatePublicSite()
+}
