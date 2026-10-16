@@ -9,9 +9,9 @@ const display = Montserrat({ subsets: ['latin'], weight: ['700', '800', '900'], 
 const body = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'], variable: '--font-body' })
 
 export const metadata: Metadata = {
-  title: 'PBPI Kabupaten Garut',
+  title: 'PBPI Kabupaten Garut — Peringkat, Turnamen & Klub Padel Garut',
   description:
-    'Situs resmi PBPI Kabupaten Garut, Persatuan Besar Padel Indonesia Pengurus Kabupaten Garut. Peringkat pemain, klub, turnamen, pelatih, dan wasit.',
+    'Situs resmi PBPI Kabupaten Garut, Perkumpulan Besar Padel Indonesia Pengurus Kabupaten Garut. Peringkat pemain, klub, turnamen, pelatih, dan wasit.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

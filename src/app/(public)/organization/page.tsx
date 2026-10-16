@@ -10,7 +10,7 @@ export default async function OrganizationPage() {
       <PageBanner
         eyebrow="Pengurus"
         title={<>PENGURUS<br />PBPI KABUPATEN GARUT</>}
-        description="Struktur organisasi Pengurus Kabupaten Garut, Persatuan Besar Padel Indonesia."
+        description="Struktur organisasi Pengurus Kabupaten Garut, Perkumpulan Besar Padel Indonesia."
       />
 
       <div className="section">

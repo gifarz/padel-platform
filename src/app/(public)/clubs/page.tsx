@@ -9,7 +9,7 @@ export default async function ClubsDirectoryPage({ searchParams }: { searchParam
 
   return (
     <div>
-      <PageBanner eyebrow="Federasi" title="Direktori Klub" description="Klub padel resmi yang terdaftar di bawah PBPI Kabupaten Garut." />
+      <PageBanner eyebrow="Direktori" title="Direktori Klub" description="Klub padel resmi yang terdaftar di bawah PBPI Kabupaten Garut." />
 
       <div className="section">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter kecamatan">

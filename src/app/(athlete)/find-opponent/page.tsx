@@ -4,7 +4,7 @@ import { SortSelect } from '@/components/athlete/sort-select'
 import { fmtNum } from '@/lib/format'
 
 const SORTS = [
-  { value: 'match', label: 'Level match terbaik' },
+  { value: 'match', label: 'Kecocokan terbaik' },
   { value: 'rating', label: 'Poin' },
   { value: 'active', label: 'Paling aktif' },
 ] as const
@@ -46,7 +46,7 @@ export default async function PlayersPage({
         </div>
       </div>
 
-      {list.length === 0 && <p className="mt-10 text-sm text-muted">Tidak ada atlet lain yang cocok dengan filter ini.</p>}
+      {list.length === 0 && <p className="mt-10 text-sm text-muted">Tidak ada pemain lain yang cocok dengan filter ini.</p>}
 
       <div className="mt-8 grid gap-px bg-line sm:grid-cols-2 lg:grid-cols-3">
         {list.map((p) => (
@@ -58,7 +58,7 @@ export default async function PlayersPage({
               </div>
               <div className="text-right">
                 <p className="d text-3xl text-accent">{p.match}%</p>
-                <p className="lb">Match</p>
+                <p className="lb">Kecocokan</p>
               </div>
             </div>
             <div className="flex gap-6 border-t border-line pt-3 text-sm">

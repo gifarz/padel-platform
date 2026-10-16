@@ -15,9 +15,9 @@ export async function RankingSection() {
       <div className="section grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-20">
         <div>
           <span className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-lime text-navy"><Trophy size={25} strokeWidth={1.5} aria-hidden="true" /></span>
-          <p className="section-title">The leaderboard</p>
-          <h2 className="d mt-4 text-4xl text-navy sm:text-5xl lg:text-6xl">Kerja keras.<br />Poin nyata.</h2>
-          <p className="mt-5 max-w-sm text-sm leading-7 text-muted">Kenali para pemain yang membawa permainan ke level berikutnya. Pantau peringkat dan temukan motivasi untuk rally selanjutnya.</p>
+          <p className="section-title">Peringkat pemain</p>
+          <h2 className="d mt-4 text-4xl text-navy sm:text-5xl lg:text-6xl">Ayo Naikkan<br />Peringkatmu</h2>
+          <p className="mt-5 max-w-sm text-sm leading-7 text-muted">Lihat siapa yang ada di puncak dan berapa poin yang sudah mereka kumpulkan. Siapa tahu namamu menyusul berikutnya.</p>
           <Link href="/ranking" className="section-link mt-7">Lihat Semua Peringkat <ArrowUpRight size={18} aria-hidden="true" /></Link>
         </div>
         <div className="min-w-0 rounded-3xl border border-line bg-white p-4 shadow-card sm:p-7">

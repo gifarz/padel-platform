@@ -14,12 +14,12 @@ export async function NewsSection() {
   return (
     <section className="section">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div><p className="section-title">Di dalam & di luar lapangan</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Cerita dari lapangan.</h2></div>
+        <div><p className="section-title">Dari Redaksi</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Cerita dari lapangan.</h2></div>
         <Link href="/news" className="section-link">Semua Berita <ArrowUpRight size={18} aria-hidden="true" /></Link>
       </div>
 
       {news.length === 0 ? (
-        <p className="empty-state">Cerita baru segera hadir. Belum ada berita yang dipublikasikan.</p>
+        <p className="empty-state">Belum ada berita. Kabar terbaru seputar padel Garut akan muncul di sini.</p>
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-3">
           {news.map((n) => (

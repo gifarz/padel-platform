@@ -19,7 +19,7 @@ export default async function NewsListPage({ searchParams }: { searchParams: Pro
 
       <div className="section">
         {rows.length === 0 ? (
-          <p className="text-sm text-muted">Belum ada berita yang dipublikasikan.</p>
+          <p className="text-sm text-muted">Belum ada berita. Kabar terbaru seputar padel Garut akan muncul di sini.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((n) => (

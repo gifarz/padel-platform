@@ -75,7 +75,7 @@ export async function getMyProfileForEdit() {
 
 export async function requireMe() {
   const me = await getMe()
-  if (!me) throw new Error('Masuk sebagai atlet dulu.')
+  if (!me) throw new Error('Masuk dulu sebagai pemain.')
   return me
 }
 

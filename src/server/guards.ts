@@ -10,7 +10,7 @@ export async function requireAdmin() {
 
 export async function requireAthlete() {
   const s = await auth()
-  if (!s?.user?.athleteId) throw new Error('Masuk sebagai atlet dulu.')
+  if (!s?.user?.athleteId) throw new Error('Masuk dulu sebagai pemain.')
   return { athleteId: s.user.athleteId, userId: s.user.id! }
 }
 

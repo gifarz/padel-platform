@@ -8,21 +8,21 @@ export default function RegisterPage() {
     <div>
       <PageBanner
         eyebrow="Pendaftaran"
-        title="Gabung Jadi Atlet"
-        description="Pendaftaran akun atlet PBPI Kabupaten Garut kini dikelola langsung oleh admin, bukan lewat formulir mandiri."
+        title="Gabung Jadi Pemain"
+        description="Pendaftaran akun pemain diurus langsung oleh admin PBPI Kabupaten Garut."
       />
       <div className="section max-w-2xl">
         <p className="section-title">Bagaimana caranya?</p>
         <p className="mt-3 text-sm text-ink">
-          Untuk menjaga data pemain tetap akurat dan terverifikasi, akun atlet baru dibuatkan oleh admin
-          PBPI Kabupaten Garut. Hubungi sekretariat lewat telepon, email, atau Instagram dengan menyertakan
-          nama lengkap, nomor HP, dan kecamatan kamu. Admin akan membuatkan akun beserta kata sandi awal.
+          Supaya data pemain tetap akurat, akun baru dibuatkan langsung oleh admin PBPI Kabupaten Garut.
+          Hubungi sekretariat lewat telepon, email, atau Instagram dengan menyertakan nama lengkap, nomor HP,
+          dan kecamatanmu. Admin akan membuatkan akun beserta kata sandi awal.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a href={`tel:${CONTACT_PHONE.replace(/\s/g, '')}`} className="btn-p px-6 py-3 text-xs">
             Hubungi Sekretariat
           </a>
-          <Link href="/contact" className="btn-o px-6 py-3 text-xs">Lihat Kontak Lengkap</Link>
+          <Link href="/contact" className="inline-flex h-14 items-center justify-center rounded-full border border-navy px-6 text-xs font-bold text-navy transition duration-200 hover:bg-navy hover:text-white">Lihat Kontak Lengkap</Link>
         </div>
         <p className="mt-8 text-xs text-muted">
           Sudah punya akun? <Link href="/login" className="text-accent">Masuk di sini</Link>.

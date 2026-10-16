@@ -32,10 +32,10 @@ export default async function DashboardPage() {
           <div className="border border-t-0 border-line bg-surface p-6 sm:border-t sm:border-l-0">
             <p className="lb">Peringkat</p>
             <p className="d text-5xl">{rank ? `#${rank}` : '-'}</p>
-            <p className="mt-1 text-sm text-muted">dari {board.length} atlet</p>
+            <p className="mt-1 text-sm text-muted">dari {board.length} pemain</p>
           </div>
           <div className="border border-t-0 border-line bg-surface p-6 sm:border-t sm:border-l-0">
-            <p className="lb">Win rate</p>
+            <p className="lb">Rasio menang</p>
             <p className="d text-5xl">{me.winRate}%</p>
             <p className="mt-1 text-sm text-muted">{me.wins} menang / {me.losses} kalah</p>
           </div>
@@ -58,13 +58,13 @@ export default async function DashboardPage() {
           <Link href="/find-opponent" className="text-xs font-bold uppercase tracking-widest text-accent">Lihat semua →</Link>
         </div>
         {rivals.length === 0 ? (
-          <p className="mt-5 text-sm text-muted">Belum ada atlet lain yang terdaftar di kotamu.</p>
+          <p className="mt-5 text-sm text-muted">Belum ada pemain lain yang terdaftar di kotamu.</p>
         ) : (
           <div className="mt-5 grid gap-px bg-line sm:grid-cols-3">
             {rivals.map((r) => (
               <div key={r.id} className="bg-bg p-5">
                 <p className="d text-4xl text-accent">{r.match}%</p>
-                <p className="lb">Level match</p>
+                <p className="lb">Kecocokan</p>
                 <p className="mt-3 font-display text-2xl uppercase">{r.name}</p>
                 <p className="text-sm text-muted">{r.city} · {fmtNum(r.rating)} poin</p>
                 <Link href={`/profile/${r.username}`} className="mt-4 inline-block border border-ink px-4 py-2 text-xs font-bold uppercase tracking-widest hover:bg-ink hover:text-bg">

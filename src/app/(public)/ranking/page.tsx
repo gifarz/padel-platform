@@ -49,7 +49,7 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
               <Trend trend={p.trend} value={p.value} />
             </Link>
           ))}
-          {sorted.length === 0 && <p className="px-4 py-6 text-sm text-muted">Belum ada atlet di kecamatan ini.</p>}
+          {sorted.length === 0 && <p className="px-4 py-6 text-sm text-muted">Belum ada pemain di kecamatan ini.</p>}
         </div>
 
         {/* mobile cards */}

@@ -34,7 +34,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
           </div>
           {isMe ? (
             <a href="/settings" className="border border-white/30 px-6 py-3 text-xs font-bold uppercase tracking-widest text-white/80 hover:border-white hover:text-white">
-              Edit profil
+              Ubah profil
             </a>
           ) : me && (
             <form action={challenge}>
@@ -52,7 +52,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
       <div className="mt-6 grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
         <div className="bg-bg p-5"><p className="d text-4xl text-accent">{fmtNum(athlete.rating)}</p><p className="lb">Poin</p></div>
         <div className="bg-bg p-5"><p className="d text-4xl">{athlete.matchesPlayed}</p><p className="lb">Pertandingan</p></div>
-        <div className="bg-bg p-5"><p className="d text-4xl">{athlete.winRate}%</p><p className="lb">Win rate</p></div>
+        <div className="bg-bg p-5"><p className="d text-4xl">{athlete.winRate}%</p><p className="lb">Rasio menang</p></div>
         <div className="bg-bg p-5"><p className="d text-4xl">{athlete.wins}/{athlete.losses}</p><p className="lb">Menang/Kalah</p></div>
       </div>
 

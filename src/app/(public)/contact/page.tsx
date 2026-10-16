@@ -38,8 +38,8 @@ export default function ContactPage() {
         <div className="card p-6">
           <p className="section-title">Kirim Pesan</p>
           <p className="mt-2 text-xs text-muted">
-            Formulir ini belum terhubung ke sistem. Untuk saat ini silakan hubungi kami langsung melalui
-            telepon, email, atau Instagram di samping.
+            Formulir ini belum aktif. Untuk sekarang, hubungi kami lewat telepon, email, atau Instagram yang
+            tertera di halaman ini.
           </p>
           <form className="mt-4 grid gap-3">
             <label htmlFor="contact-name" className="sr-only">Nama</label>
@@ -48,7 +48,7 @@ export default function ContactPage() {
             <input id="contact-reach" disabled placeholder="Email atau Nomor HP" className="inp opacity-60" />
             <label htmlFor="contact-message" className="sr-only">Pesan</label>
             <textarea id="contact-message" disabled placeholder="Pesan" rows={4} className="inp resize-none opacity-60" />
-            <button disabled type="button" className="btn-p opacity-50">Kirim (segera hadir)</button>
+            <button disabled type="button" className="btn-p opacity-50">Kirim (belum tersedia)</button>
           </form>
         </div>
       </div>

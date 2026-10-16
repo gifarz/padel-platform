@@ -10,12 +10,12 @@ export async function ClubSection() {
     <section className="border-t border-line bg-surface">
       <div className="section">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-          <div><p className="section-title">Find your people</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Klub lokal.<br />Energi luar biasa.</h2></div>
-          <Link href="/clubs" className="section-link">Jelajahi Direktori Klub <ArrowUpRight size={18} aria-hidden="true" /></Link>
+          <div><p className="section-title">Direktori klub</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Klub padel<br />di seluruh Garut.</h2></div>
+          <Link href="/clubs" className="section-link">Lihat Semua Klub <ArrowUpRight size={18} aria-hidden="true" /></Link>
         </div>
 
         {clubs.length === 0 ? (
-          <p className="empty-state">Direktori klub sedang disusun. Pantau terus halaman ini.</p>
+          <p className="empty-state">Daftar klub sedang disiapkan. Cek lagi sebentar lagi, ya.</p>
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {clubs.map((c) => (

@@ -34,13 +34,13 @@ export function Footer() {
   return (
     <footer className="border-t border-navy-dark bg-navy-dark text-white">
       <div className="mx-auto max-w-site px-4 py-14 sm:px-8 lg:pt-20">
-        <div className="mb-12 flex flex-wrap items-center justify-between gap-5 border-b border-white/15 pb-9"><p className="d text-3xl sm:text-5xl">See you <span className="text-lime">on court.</span></p><Link href="/register" className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 text-2xl text-lime transition hover:bg-lime hover:text-navy" aria-label="Gabung PBPI Garut">↗</Link></div>
+        <div className="mb-12 flex flex-wrap items-center justify-between gap-5 border-b border-white/15 pb-9"><p className="d text-3xl sm:text-5xl">Sampai jumpa <span className="text-lime">di lapangan.</span></p><Link href="/register" className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/25 text-2xl text-lime transition hover:bg-lime hover:text-navy" aria-label="Gabung PBPI Garut">↗</Link></div>
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1fr]">
           <div>
             <Image src="/logo/logo-white.svg" alt="PBPI Kabupaten Garut" width={220} height={58} className="h-14 w-auto" />
             <p className="mt-4 max-w-xs text-sm text-white/70">
-              Persatuan Besar Padel Indonesia, Pengurus Kabupaten Garut. Organisasi resmi yang menaungi atlet,
-              klub, pelatih, dan wasit padel di Kabupaten Garut.
+              Perkumpulan Besar Padel Indonesia, Pengurus Kabupaten Garut. Menghimpun pemain, klub, pelatih, dan
+              wasit padel se-Kabupaten Garut.
             </p>
           </div>
 
@@ -78,7 +78,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} PBPI Kabupaten Garut. Semua hak dilindungi.</span>
-          <span>Memajukan Padel. Membangun Prestasi Garut.</span>
+          <span>Membina padel Garut dari akar rumput.</span>
         </div>
       </div>
     </footer>

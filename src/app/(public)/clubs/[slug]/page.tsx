@@ -23,7 +23,7 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
           <div>
             {club.isVerified && <p className="lb text-red-300">Terverifikasi ✓</p>}
             <h1 className="d mt-2 text-4xl sm:text-5xl">{club.name}</h1>
-            <p className="mt-1 text-sm text-white/70">{club.district?.name ?? '-'} &middot; {club.members.length} atlet</p>
+            <p className="mt-1 text-sm text-white/70">{club.district?.name ?? '-'} &middot; {club.members.length} pemain</p>
           </div>
         </div>
       </div>
@@ -47,16 +47,16 @@ export default async function ClubDetailPage({ params }: { params: Promise<{ slu
         </div>
 
         <div className="min-w-0">
-          <p className="section-title">Daftar Atlet</p>
+          <p className="section-title">Daftar Pemain</p>
           {club.members.length === 0 ? (
-            <p className="mt-3 border-y border-line py-6 text-sm text-muted">Belum ada atlet terdaftar.</p>
+            <p className="mt-3 border-y border-line py-6 text-sm text-muted">Belum ada pemain terdaftar.</p>
           ) : (
             <div className="mt-3 overflow-x-auto border-y border-line">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-line text-left">
                     <th className="th w-12">#</th>
-                    <th className="th">Atlet</th>
+                    <th className="th">Pemain</th>
                     <th className="th text-right">Poin</th>
                   </tr>
                 </thead>

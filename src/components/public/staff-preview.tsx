@@ -21,7 +21,7 @@ export async function StaffPreview() {
               </li>
             ))}
           </ul>
-          <Link href="/contact" className="section-link mt-5">Hubungi Kami untuk Info Pelatih ↗</Link>
+          <Link href="/contact" className="section-link mt-5">Tanya soal pelatih ↗</Link>
         </div>
 
         <div>
@@ -36,7 +36,7 @@ export async function StaffPreview() {
               </li>
             ))}
           </ul>
-          <Link href="/contact" className="section-link mt-5">Hubungi Kami untuk Info Wasit ↗</Link>
+          <Link href="/contact" className="section-link mt-5">Tanya soal wasit ↗</Link>
         </div>
       </div>
     </section>

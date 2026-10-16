@@ -26,21 +26,21 @@ export function Hero() {
       <div className="relative mx-auto flex w-full max-w-site flex-1 flex-col justify-center px-5 pb-10 pt-[calc(var(--header-h)+2.5rem)] sm:px-8">
         <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 sm:text-xs">
           <span className="flex h-2 w-2 rounded-full bg-lime" />
-          Official home of padel · Kabupaten Garut
+          Situs resmi padel · Kabupaten Garut
         </div>
 
         <div className="mt-8 max-w-[900px]">
-          <h1 className="d text-[clamp(2.5rem,7vw,6rem)] !leading-[0.98]">
-            SATU LAPANGAN.<br />
-            <span className="text-lime">JUTAAN</span><br />
-            <span className="hero-outline">KEMUNGKINAN.</span>
+          <h1 className="d text-[clamp(2.5rem,7vw,5rem)] !leading-[0.98]">
+            PLATFORM PADEL<br />
+            <span className="text-lime">UNTUKMU </span>
+            <span className="hero-outline">DI GARUT.</span>
           </h1>
-          <p className="mt-7 max-w-[440px] text-sm leading-7 text-white/80 sm:text-base">
-            Dari rally pertama hingga podium juara. Temukan komunitasmu, tantang kemampuanmu, dan tumbuh bersama padel Garut.
+          <p className="mt-7 max-w-[270px] text-sm leading-7 text-white/80 sm:text-base">
+            Cari teman main, tantang lawan, dan ikut turnamen padel di Garut.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/register" className="btn-sport">Mulai Perjalananmu <ArrowUpRight size={19} aria-hidden="true" /></Link>
-            <Link href="/tournaments" className="btn-o">Jelajahi Turnamen <ArrowUpRight size={18} aria-hidden="true" /></Link>
+            <Link href="/register" className="btn-sport">Daftar Sekarang <ArrowUpRight size={19} aria-hidden="true" /></Link>
+            <Link href="/tournaments" className="btn-o">Lihat Turnamen <ArrowUpRight size={18} aria-hidden="true" /></Link>
           </div>
         </div>
       </div>
@@ -49,10 +49,10 @@ export function Hero() {
         <div className="flex items-end justify-between gap-5 border-t border-white/20 pt-6">
           <a href="#jelajahi" className="group flex items-center gap-3 text-xs font-medium text-white/80 hover:text-lime">
             <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 transition group-hover:border-lime"><ArrowDown size={15} aria-hidden="true" /></span>
-            Kenali dunia padel Garut
+            Kenalan sama padel Garut
           </a>
           <span className="hidden text-right text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 sm:block">
-            Persatuan Besar Padel Indonesia<br /><span className="mt-1 block text-white">Pengurus Kabupaten Garut</span>
+            Perkumpulan Besar Padel Indonesia<br /><span className="mt-1 block text-white">Pengurus Kabupaten Garut</span>
           </span>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { logoutAction } from '@/server/actions/auth'
 
 const LINKS = [
-  { href: '/dashboard', label: 'Home' },
+  { href: '/dashboard', label: 'Beranda' },
   { href: '/find-opponent', label: 'Cari Lawan' },
   { href: '/matches', label: 'Pertandingan' },
   { href: '/competitions', label: 'Kompetisi' },

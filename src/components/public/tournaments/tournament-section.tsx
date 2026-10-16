@@ -17,12 +17,12 @@ export async function TournamentSection() {
   return (
     <section className="section">
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div><p className="section-title">Saatnya bertanding</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Next up. Game on.</h2><p className="mt-4 text-sm text-muted">Tandai kalendermu. Tantangan berikutnya menanti.</p></div>
+        <div><p className="section-title">Saatnya bertanding</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Turnamen mendatang.</h2><p className="mt-4 text-sm text-muted">Catat tanggalnya dan siapkan raketmu.</p></div>
         <Link href="/tournaments" className="section-link">Semua Turnamen <ArrowUpRight size={18} aria-hidden="true" /></Link>
       </div>
 
       {tournaments.length === 0 ? (
-        <div className="empty-state"><CalendarDays size={28} className="mx-auto mb-4 text-navy/40" aria-hidden="true" /><p className="font-semibold text-navy">Bersiap untuk pertandingan berikutnya.</p><p className="mt-2">Belum ada turnamen yang dijadwalkan saat ini. Pantau terus agenda kami.</p></div>
+        <div className="empty-state"><CalendarDays size={28} className="mx-auto mb-4 text-navy/40" aria-hidden="true" /><p className="font-semibold text-navy">Belum ada jadwal turnamen.</p><p className="mt-2">Turnamen berikutnya akan diumumkan di sini. Cek lagi nanti, ya.</p></div>
       ) : (
         <div className="mt-9 grid gap-5 md:grid-cols-3">
           {tournaments.map((t) => (

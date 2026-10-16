@@ -14,17 +14,16 @@ export default function AboutPage() {
       <PageBanner
         eyebrow="Tentang Kami"
         title="Tentang PBPI Kabupaten Garut"
-        description="Mengenal lebih dekat organisasi resmi yang menaungi olahraga padel di Kabupaten Garut."
+        description="Kenali organisasi yang menaungi padel di Kabupaten Garut."
       />
 
       <div className="section max-w-3xl">
-        <p className="section-title">Pendahuluan</p>
+        <p className="section-title">Siapa Kami</p>
         <p className="mt-3 text-sm leading-relaxed text-ink sm:text-base">
-          PBPI Kabupaten Garut (Persatuan Besar Padel Indonesia, Pengurus Kabupaten Garut) adalah induk
-          organisasi resmi yang menaungi seluruh kegiatan olahraga padel di wilayah Kabupaten Garut. Sebagai
-          bagian dari struktur PB PABSI di tingkat kabupaten, kami bertanggung jawab atas pembinaan atlet,
-          pengembangan klub, penyelenggaraan turnamen, serta sertifikasi pelatih dan wasit di seluruh 42
-          kecamatan.
+          PBPI Kabupaten Garut (Perkumpulan Besar Padel Indonesia, Pengurus Kabupaten Garut) adalah induk
+          organisasi resmi untuk seluruh kegiatan padel di Kabupaten Garut. Sebagai bagian dari PB Padel
+          Indonesia di tingkat kabupaten, kami bertanggung jawab atas pembinaan pemain, pengembangan klub,
+          penyelenggaraan turnamen, serta sertifikasi pelatih dan wasit di 42 kecamatan.
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2">
@@ -32,7 +31,7 @@ export default function AboutPage() {
             <p className="section-title">Visi</p>
             <p className="mt-3 text-sm leading-relaxed text-ink">
               Menjadikan Kabupaten Garut sebagai salah satu pusat pengembangan olahraga padel terkemuka di
-              Jawa Barat, dengan ekosistem atlet, klub, dan kompetisi yang berkelanjutan.
+              Jawa Barat, dengan pembinaan atlet, klub, dan kompetisi yang berkelanjutan.
             </p>
           </div>
           <div className="card p-6">

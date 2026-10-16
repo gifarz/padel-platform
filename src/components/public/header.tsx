@@ -32,7 +32,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     href: '/clubs',
-    label: 'Kompetisi',
+    label: 'Klub & Turnamen',
     children: [
       { href: '/clubs', label: 'Klub' },
       { href: '/tournaments', label: 'Turnamen' },

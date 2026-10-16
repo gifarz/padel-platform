@@ -15,7 +15,7 @@ export default function LoginPage() {
 
       <form action={action} className="w-full max-w-sm border border-line bg-surface p-8">
         <h1 className="d text-4xl">Masuk</h1>
-        <p className="mt-1 text-sm text-muted">Masuk ke akun PBPI Kab. Garut kamu.</p>
+        <p className="mt-1 text-sm text-muted">Masuk ke akun PBPI Kabupaten Garut kamu.</p>
 
         <div className="mt-6 space-y-4">
           <div>

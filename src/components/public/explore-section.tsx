@@ -3,17 +3,17 @@ import Link from 'next/link'
 import { ArrowUpRight, Trophy, Users, MapPin } from 'lucide-react'
 
 const paths = [
-  { number: '01', title: 'Temukan ritmemu.', description: 'Kenali pemain, bangun koneksi, dan jadilah bagian dari komunitas.', href: '/players', label: 'Jelajahi pemain', icon: Users, image: '/images/player-backhand.jpg' },
-  { number: '02', title: 'Naikkan levelmu.', description: 'Bawa semangat kompetisimu ke lapangan. Setiap poin berarti.', href: '/tournaments', label: 'Temukan turnamen', icon: Trophy, image: '/images/player-return.jpg' },
-  { number: '03', title: 'Temukan rumahmu.', description: 'Cari klub di dekatmu dan mulai cerita padel berikutnya.', href: '/clubs', label: 'Cari klub padel', icon: MapPin, image: '/images/racket-balls.jpg' },
+  { number: '01', title: 'Cari teman main.', description: 'Kenalan sama pemain lain dan cari teman buat main bareng.', href: '/players', label: 'Lihat pemain', icon: Users, image: '/images/player-backhand.jpg' },
+  { number: '02', title: 'Ikut turnamen.', description: 'Cari turnamen berikutnya dan uji kemampuanmu di lapangan.', href: '/tournaments', label: 'Lihat turnamen', icon: Trophy, image: '/images/player-return.jpg' },
+  { number: '03', title: 'Gabung klub.', description: 'Cari klub padel terdekat dan mulai main rutin.', href: '/clubs', label: 'Lihat klub', icon: MapPin, image: '/images/racket-balls.jpg' },
 ]
 
 export function ExploreSection() {
   return (
     <section className="section">
       <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-        <div><p className="section-title">Play. Connect. Grow.</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Lebih dari<br />sekadar permainan.</h2></div>
-        <p className="max-w-sm text-sm leading-7 text-muted">Ada tempat untuk setiap pemain. Dari yang baru mengenal padel hingga yang siap mengejar prestasi.</p>
+        <div><p className="section-title">Tiga cara memulai</p><h2 className="d mt-4 text-4xl text-navy sm:text-5xl">Mau main?<br />Pilih caramu.</h2></div>
+        <p className="max-w-sm text-sm leading-7 text-muted">Baru kenal padel atau sudah biasa ikut turnamen? Semua bisa mulai dari sini.</p>
       </div>
       <div className="mt-9 grid gap-5 md:grid-cols-3">
         {paths.map(({ number, title, description, href, label, icon: Icon, image }) => (
