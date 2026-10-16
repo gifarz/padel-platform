@@ -22,7 +22,7 @@ export default function RegisterPage() {
           <a href={`tel:${CONTACT_PHONE.replace(/\s/g, '')}`} className="btn-p px-6 py-3 text-xs">
             Hubungi Sekretariat
           </a>
-          <Link href="/contact" className="inline-flex h-14 items-center justify-center rounded-full border border-navy px-6 text-xs font-bold text-navy transition duration-200 hover:bg-navy hover:text-white">Lihat Kontak Lengkap</Link>
+          <Link href="/contact" className="btn-line px-6 text-xs">Lihat Kontak Lengkap</Link>
         </div>
         <p className="mt-8 text-xs text-muted">
           Sudah punya akun? <Link href="/login" className="text-accent">Masuk di sini</Link>.

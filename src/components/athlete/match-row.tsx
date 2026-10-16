@@ -36,11 +36,11 @@ export function MatchRow({ id, label, date, court, status, delta, canAccept, can
           {canAccept && (
             <div className="flex gap-2">
               <button disabled={pending} onClick={() => startTransition(() => acceptMatchAction(id))} className="btn-p">Terima</button>
-              <button disabled={pending} onClick={() => startTransition(() => declineMatchAction(id))} className="btn-o">Tolak</button>
+              <button disabled={pending} onClick={() => startTransition(() => declineMatchAction(id))} className="btn-line">Tolak</button>
             </div>
           )}
           {canSubmitResult && !showScore && (
-            <button onClick={() => setShowScore(true)} className="btn-o">Input skor</button>
+            <button onClick={() => setShowScore(true)} className="btn-line">Input skor</button>
           )}
         </div>
       </div>

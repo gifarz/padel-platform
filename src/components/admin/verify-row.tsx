@@ -36,7 +36,7 @@ export function VerifyRow({ id, teamA, teamB, sets, winnerTeam }: Props) {
           {!verified ? (
             <form action={verifyAction} className="flex items-center gap-2">
               <button disabled={verifying} className="btn-p">{verifying ? 'Memverifikasi…' : 'Verifikasi'}</button>
-              <button type="button" onClick={() => setCorrecting((c) => !c)} className="btn-o">Koreksi</button>
+              <button type="button" onClick={() => setCorrecting((c) => !c)} className="btn-line">Koreksi</button>
             </form>
           ) : (
             <span className="text-xs font-bold uppercase tracking-widest text-accent">Poin diperbarui ✓</span>

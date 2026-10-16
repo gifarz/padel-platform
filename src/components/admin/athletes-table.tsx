@@ -93,13 +93,13 @@ export function AthletesTable({ initial, districts, clubs, refreshSignal = 0 }: 
             <span className="text-muted">{selected.length} dipilih</span>
             <button
               onClick={() => startTransition(async () => { await setAthletesActiveAction(selected, false); setSelected([]); setData(await searchAthletesAction(q, page)) })}
-              className="btn-o"
+              className="btn-line"
             >
               Nonaktifkan
             </button>
             <button
               onClick={() => startTransition(async () => { await setAthletesActiveAction(selected, true); setSelected([]); setData(await searchAthletesAction(q, page)) })}
-              className="btn-o"
+              className="btn-line"
             >
               Aktifkan
             </button>
@@ -153,8 +153,8 @@ export function AthletesTable({ initial, districts, clubs, refreshSignal = 0 }: 
       <div className="mt-4 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted">
         <span>Halaman {page} dari {data.pages} · {data.total} atlet</span>
         <div className="flex gap-2">
-          <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="btn-o">← Sebelumnya</button>
-          <button disabled={page >= data.pages} onClick={() => setPage((p) => p + 1)} className="btn-o">Berikutnya →</button>
+          <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="btn-line">← Sebelumnya</button>
+          <button disabled={page >= data.pages} onClick={() => setPage((p) => p + 1)} className="btn-line">Berikutnya →</button>
         </div>
       </div>
     </div>

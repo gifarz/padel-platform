@@ -43,7 +43,7 @@ export function CreateCompetitionForm({ locations: initialLocations }: { locatio
           <input name="province" placeholder="Provinsi (opsional)" className="inp" />
           <input name="address" placeholder="Alamat (opsional)" className="inp" />
           <div className="flex items-center gap-3 sm:col-span-2">
-            <button type="submit" disabled={addingLocation} className="btn-o h-10 w-fit px-4 text-xs">
+            <button type="submit" disabled={addingLocation} className="btn-line h-10 w-fit px-4 text-xs">
               {addingLocation ? 'Menambahkan…' : 'Simpan lokasi'}
             </button>
             <button type="button" onClick={() => setShowNewLocation(false)} className="text-xs font-bold uppercase tracking-widest text-muted hover:text-ink">Batal</button>

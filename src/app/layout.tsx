@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: 'PBPI Kabupaten Garut — Peringkat, Turnamen & Klub Padel Garut',
   description:
     'Situs resmi PBPI Kabupaten Garut, Perkumpulan Besar Padel Indonesia Pengurus Kabupaten Garut. Peringkat pemain, klub, turnamen, pelatih, dan wasit.',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

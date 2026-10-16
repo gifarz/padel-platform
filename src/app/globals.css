@@ -67,6 +67,10 @@ body {
   .btn-o {
     @apply inline-flex h-14 items-center justify-center gap-3 rounded-full border border-white/40 bg-transparent px-7 text-sm font-bold text-white transition duration-200 hover:border-white hover:bg-white/10 hover:-translate-y-0.5 disabled:opacity-40;
   }
+  /* Outline button for light surfaces — btn-o is white-on-dark only. */
+  .btn-line {
+    @apply inline-flex h-14 items-center justify-center gap-3 rounded-full border border-navy px-7 text-sm font-bold text-navy transition duration-200 hover:bg-navy hover:text-white hover:-translate-y-0.5 disabled:opacity-40;
+  }
   .btn-sport {
     @apply inline-flex h-14 items-center justify-center gap-3 rounded-full border border-lime bg-lime px-7 text-sm font-bold text-navy-dark transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:border-white;
   }
