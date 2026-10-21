@@ -346,6 +346,9 @@ model CompetitionParticipant {
   registeredAt  DateTime          @default(now())
 
   @@unique([competitionId, athleteId])
+  @@index([competitionId, status])
+  @@index([athleteId])
+  @@index([partnerId])
 }
 
 // ───────── Matches ─────────
@@ -391,6 +394,8 @@ model Match {
 
   @@index([status])
   @@index([scheduledAt])
+  @@index([competitionId, round])
+  @@index([nextMatchId])
 }
 
 model MatchParticipant {

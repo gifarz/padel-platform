@@ -1,5 +1,6 @@
 import { getMyProfileForEdit } from '@/server/queries'
 import { SettingsForm } from '@/components/athlete/settings-form'
+import { ChangePasswordForm } from '@/components/change-password-form'
 
 export default async function SettingsPage() {
   const profile = await getMyProfileForEdit()
@@ -16,6 +17,7 @@ export default async function SettingsPage() {
         dominantHand={profile.dominantHand}
         preferredPosition={profile.preferredPosition}
       />
+      <ChangePasswordForm />
     </div>
   )
 }

@@ -8,7 +8,8 @@ const GROUPS: { title: string; statuses: string[] }[] = [
   { title: 'Selesai', statuses: ['VERIFIED', 'PLAYED', 'CANCELLED'] },
 ]
 
-export default async function MatchesPage() {
+export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams
   const matches = await getMyMatches()
 
   return (
@@ -19,6 +20,8 @@ export default async function MatchesPage() {
         </h1>
         <Link href="/find-opponent" className="btn-p">+ Tantang pemain baru</Link>
       </div>
+
+      {error && <p role="alert" className="mt-6 border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">{error.slice(0, 200)}</p>}
 
       <div className="mt-10 space-y-10">
         {GROUPS.map((g) => {

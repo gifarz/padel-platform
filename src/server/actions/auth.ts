@@ -2,11 +2,13 @@
 import { AuthError } from 'next-auth'
 import { signIn, signOut } from '@/auth'
 import { normalizeIndonesianPhone } from '@/lib/phone'
+import { isRateLimited } from '@/lib/rate-limit'
 
 export async function loginAction(_prev: string | undefined, formData: FormData) {
   const rawPhone = String(formData.get('phone') ?? '').trim()
   const phone = normalizeIndonesianPhone(rawPhone)
   if (!phone) return 'Nomor HP tidak valid.'
+  if (isRateLimited(`login:${phone}`)) return 'Terlalu banyak percobaan gagal. Coba lagi dalam 15 menit.'
 
   try {
     await signIn('credentials', {

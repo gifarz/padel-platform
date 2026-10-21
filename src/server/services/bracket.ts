@@ -4,17 +4,19 @@
  * Seeding uses the standard "1 vs last, 2 vs second-last…" tournament order,
  * generated recursively so higher seeds only meet in later rounds. Byes (when
  * the participant count isn't a power of two) are resolved as a same-round
- * "bye match": one participant on Team A, nobody on Team B, immediately
- * VERIFIED without touching the rating engine — a bye is a scheduling
- * artifact, not a played result, so it must never call verifyMatch().
+ * "bye match": one side only, immediately VERIFIED without touching the rating
+ * engine — a bye is a scheduling artifact, not a played result.
  *
  * Every round is materialized as real Match rows (round, bracketSlot,
  * nextMatchId) so the tree is fully visible before anyone's played a game.
- * Round 2+ matches start with empty participants and get filled in by
- * `advanceWinner`, called from the verification service whenever a match
- * with a nextMatchId is verified.
+ * Round 2+ matches start empty and get filled in by `advanceWinner`, called
+ * from the verification service whenever a match with a nextMatchId is verified.
+ *
+ * Doubles: each CompetitionParticipant is a PAIR (athleteId + partnerId). Both
+ * players are inserted as MatchParticipants on the same team.
  */
 import type { Prisma, PrismaClient } from '@prisma/client'
+import { isDoublesCategory } from '@/lib/competition'
 
 export class BracketError extends Error {}
 
@@ -25,9 +27,7 @@ function seedOrder(size: number): number[] {
   if (size === 1) return [1]
   const prev = seedOrder(size / 2)
   const out: number[] = []
-  for (const s of prev) {
-    out.push(s, size + 1 - s)
-  }
+  for (const s of prev) out.push(s, size + 1 - s)
   return out
 }
 
@@ -38,15 +38,30 @@ interface SeedSlot {
 
 export async function generateBracket(db: PrismaClient, competitionId: string) {
   return db.$transaction(async (tx) => {
+    const competition = await tx.competition.findUnique({ where: { id: competitionId } })
+    if (!competition) throw new BracketError('Kompetisi tidak ditemukan.')
+    if (competition.status !== 'REGISTRATION_CLOSED' && competition.status !== 'ONGOING') {
+      throw new BracketError('Tutup pendaftaran dulu (status "Pendaftaran ditutup") sebelum membuat bracket.')
+    }
+
     const existing = await tx.match.count({ where: { competitionId, round: { not: null } } })
     if (existing > 0) throw new BracketError('Bracket untuk kompetisi ini sudah dibuat.')
 
-    const participants = await tx.competitionParticipant.findMany({
+    const doubles = isDoublesCategory(competition.category)
+    const raw = await tx.competitionParticipant.findMany({
       where: { competitionId, status: 'CONFIRMED' },
-      include: { athlete: { select: { rating: true } } },
-      orderBy: { athlete: { rating: 'desc' } },
+      include: { athlete: { select: { rating: true } }, partner: { select: { rating: true } } },
     })
-    if (participants.length < 2) throw new BracketError('Minimal 2 peserta berstatus "Dikonfirmasi" untuk membuat bracket.')
+    if (raw.length < 2) throw new BracketError('Minimal 2 peserta berstatus "Dikonfirmasi" untuk membuat bracket.')
+    if (doubles) {
+      const missing = raw.filter((p) => !p.partnerId).length
+      if (missing > 0) throw new BracketError(`${missing} peserta belum punya pasangan. Kategori ganda butuh pasangan untuk setiap peserta.`)
+    }
+
+    // Seed by strength (a pair = average of both players), earliest registration breaks ties.
+    const strength = (p: (typeof raw)[number]) => (p.partner ? (p.athlete.rating + p.partner.rating) / 2 : p.athlete.rating)
+    const participants = [...raw].sort((a, b) => strength(b) - strength(a) || a.registeredAt.getTime() - b.registeredAt.getTime())
+    await Promise.all(participants.map((p, i) => tx.competitionParticipant.update({ where: { id: p.id }, data: { seed: i + 1 } })))
 
     const size = nextPowerOfTwo(participants.length)
     const order = seedOrder(size)
@@ -56,8 +71,7 @@ export async function generateBracket(db: PrismaClient, competitionId: string) {
     })
 
     const rounds = Math.log2(size)
-    const format = participants[0]?.partnerId ? 'DOUBLES' : 'SINGLES'
-    // matchIds[round][slotIndex] — slotIndex halves each round.
+    const format = doubles ? 'DOUBLES' : 'SINGLES'
     const matchIds: string[][] = []
 
     for (let round = 1; round <= rounds; round++) {
@@ -66,12 +80,9 @@ export async function generateBracket(db: PrismaClient, competitionId: string) {
       for (let slot = 0; slot < count; slot++) {
         const created = await tx.match.create({
           data: {
-            competitionId,
-            format,
-            status: 'REQUESTED',
-            round,
-            bracketSlot: slot,
-            // Administrative placeholder — this is an admin-generated bracket match, not a personal challenge.
+            competitionId, format, status: 'REQUESTED', round, bracketSlot: slot,
+            courtId: competition.courtId,
+            // Administrative placeholder — an admin-generated bracket match, not a personal challenge.
             requestedById: participants[0]!.athleteId,
           },
         })
@@ -79,8 +90,7 @@ export async function generateBracket(db: PrismaClient, competitionId: string) {
       }
       matchIds.push(ids)
 
-      // Now that this round's matches exist, wire the PREVIOUS round's matches
-      // forward to them (each pair of previous-round matches feeds one match here).
+      // Wire the PREVIOUS round forward to this one (each pair of feeders → one match here).
       if (round > 1) {
         const prevIds = matchIds[round - 2]!
         for (let slot = 0; slot < prevIds.length; slot++) {
@@ -89,34 +99,41 @@ export async function generateBracket(db: PrismaClient, competitionId: string) {
       }
     }
 
-    // Populate round 1 with real pairings, resolving byes immediately.
+    const teamRows = (matchId: string, s: SeedSlot, team: 'A' | 'B') => [
+      { matchId, athleteId: s.athleteId, team, acceptedAt: new Date() },
+      ...(s.partnerId ? [{ matchId, athleteId: s.partnerId, team, acceptedAt: new Date() }] : []),
+    ]
+
+    // Round 1: real pairings, byes resolved immediately.
     for (let slot = 0; slot < size / 2; slot++) {
       const a = slots[slot * 2]
       const b = slots[slot * 2 + 1]
       const matchId = matchIds[0]![slot]!
 
       if (a && b) {
-        await tx.matchParticipant.createMany({
-          data: [
-            { matchId, athleteId: a.athleteId, team: 'A', acceptedAt: new Date() },
-            { matchId, athleteId: b.athleteId, team: 'B', acceptedAt: new Date() },
-          ],
-        })
+        await tx.matchParticipant.createMany({ data: [...teamRows(matchId, a, 'A'), ...teamRows(matchId, b, 'B')] })
         await tx.match.update({ where: { id: matchId }, data: { status: 'SCHEDULED' } })
       } else {
-        // Bye: whichever side is real gets a walkover, structurally recorded but never rated.
         const real = a ?? b
         if (real) {
-          await tx.matchParticipant.create({ data: { matchId, athleteId: real.athleteId, team: 'A', acceptedAt: new Date() } })
+          await tx.matchParticipant.createMany({ data: teamRows(matchId, real, 'A') })
           await tx.match.update({ where: { id: matchId }, data: { status: 'VERIFIED', winnerTeam: 'A', verifiedAt: new Date() } })
           await advanceWinner(tx, matchId, real.athleteId, real.partnerId)
         }
-        // both null (padding beyond participant count) — match stays empty, harmless.
       }
     }
 
+    // Bracket exists → the competition is now running.
+    await tx.competition.update({ where: { id: competitionId }, data: { status: 'ONGOING' } })
+
     return { finalMatchId: matchIds[matchIds.length - 1]![0]!, rounds, size }
   })
+}
+
+/** Which team slot (A/B) a feeder match fills in its next-round match. */
+async function teamForFeeder(tx: Prisma.TransactionClient, matchId: string, nextMatchId: string) {
+  const feeders = await tx.match.findMany({ where: { nextMatchId }, orderBy: { bracketSlot: 'asc' }, select: { id: true } })
+  return feeders[0]?.id === matchId ? ('A' as const) : ('B' as const)
 }
 
 /** Moves the winner (and doubles partner, if any) into their next-round match. */
@@ -132,21 +149,32 @@ export async function advanceWinner(
   const nextMatch = await tx.match.findUnique({ where: { id: match.nextMatchId }, include: { participants: true } })
   if (!nextMatch) return
 
-  // Round 1 matches feed into a slot pair; lower bracketSlot of the two feeders takes Team A.
-  const feeders = await tx.match.findMany({ where: { nextMatchId: nextMatch.id }, orderBy: { bracketSlot: 'asc' } })
-  const team = feeders[0]?.id === matchId ? 'A' : 'B'
+  const team = await teamForFeeder(tx, matchId, nextMatch.id)
+  const present = new Set(nextMatch.participants.map((p) => p.athleteId))
 
-  const already = nextMatch.participants.some((p) => p.athleteId === winnerAthleteId)
-  if (already) return
+  const toAdd = [winnerAthleteId, winnerPartnerId].filter((id): id is string => !!id && !present.has(id))
+  if (toAdd.length === 0) return
+  await tx.matchParticipant.createMany({ data: toAdd.map((athleteId) => ({ matchId: nextMatch.id, athleteId, team, acceptedAt: new Date() })) })
 
-  await tx.matchParticipant.create({ data: { matchId: nextMatch.id, athleteId: winnerAthleteId, team, acceptedAt: new Date() } })
-  if (winnerPartnerId) {
-    await tx.matchParticipant.create({ data: { matchId: nextMatch.id, athleteId: winnerPartnerId, team, acceptedAt: new Date() } })
-  }
-
-  const filled = await tx.matchParticipant.count({ where: { matchId: nextMatch.id } })
-  const bothTeams = await tx.matchParticipant.groupBy({ by: ['team'], where: { matchId: nextMatch.id } })
-  if (filled > 0 && bothTeams.length === 2) {
+  const teams = await tx.matchParticipant.groupBy({ by: ['team'], where: { matchId: nextMatch.id } })
+  if (teams.length === 2 && nextMatch.status === 'REQUESTED') {
     await tx.match.update({ where: { id: nextMatch.id }, data: { status: 'SCHEDULED' } })
   }
+}
+
+/**
+ * Undo of advanceWinner, used when an admin corrects a bracket result. Refuses
+ * if the next-round match has already produced a result, because silently
+ * rewriting history past that point would corrupt ratings.
+ */
+export async function retractWinners(tx: Prisma.TransactionClient, matchId: string, athleteIds: string[]) {
+  const match = await tx.match.findUnique({ where: { id: matchId } })
+  if (!match?.nextMatchId) return
+  const next = await tx.match.findUnique({ where: { id: match.nextMatchId } })
+  if (!next) return
+  if (next.status === 'PENDING_VERIFICATION' || next.status === 'VERIFIED' || next.status === 'PLAYED') {
+    throw new BracketError('Babak berikutnya sudah dimainkan. Koreksi pertandingan babak berikutnya dulu, atau buat ulang bracket.')
+  }
+  await tx.matchParticipant.deleteMany({ where: { matchId: next.id, athleteId: { in: athleteIds } } })
+  await tx.match.update({ where: { id: next.id }, data: { status: 'REQUESTED' } })
 }

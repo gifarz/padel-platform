@@ -5,7 +5,7 @@
 import type { Prisma } from '@prisma/client'
 import { db } from '@/lib/db'
 import { auth } from '@/auth'
-import { levelForRating, pointsToNextLevel, levelMatch } from '@/lib/rating'
+import { levelForRating, pointsToNextLevel, levelMatch, DEFAULT_LEVELS } from '@/lib/rating'
 import { initials } from '@/lib/format'
 
 const athleteCard = {
@@ -16,6 +16,12 @@ const athleteCard = {
   },
 } satisfies Prisma.AthleteProfileDefaultArgs
 type AthleteCardRow = Prisma.AthleteProfileGetPayload<typeof athleteCard>
+
+/** Deactivated accounts must not show up in public lists, rankings or as challengeable opponents. */
+const activeAthlete: Prisma.AthleteProfileWhereInput = { user: { isActive: true } }
+
+/** A bye is a one-sided "match" (nobody on team B). It's a scheduling artifact, never a played game. */
+const playedMatch: Prisma.MatchWhereInput = { participants: { some: { team: 'B' } } }
 
 function toCard(a: AthleteCardRow) {
   return {
@@ -88,8 +94,8 @@ function cityOrDistrictFilter(city: string | undefined): Prisma.AthleteProfileWh
 
 export async function getLeaderboard(opts: { city?: string; gender?: 'MALE' | 'FEMALE'; take?: number } = {}) {
   const rows = await db.athleteProfile.findMany({
-    where: { ...(cityOrDistrictFilter(opts.city) ?? {}), ...(opts.gender ? { gender: opts.gender } : {}) },
-    orderBy: { rating: 'desc' },
+    where: { ...activeAthlete, ...(cityOrDistrictFilter(opts.city) ?? {}), ...(opts.gender ? { gender: opts.gender } : {}) },
+    orderBy: [{ rating: 'desc' }, { matchesPlayed: 'desc' }, { id: 'asc' }],
     take: opts.take ?? 100,
     ...athleteCard,
   })
@@ -101,27 +107,28 @@ const PAGE_SIZE = 10
 export type AthleteFilters = { gender?: 'MALE' | 'FEMALE'; districtId?: string; clubId?: string; levelSlug?: string }
 
 export async function getAthletesPage(query: string, page: number, filters: AthleteFilters = {}) {
+  // Level is derived from rating, so translate the slug into a rating range and filter in the
+  // database. (Filtering after pagination left short pages and a wrong total.)
+  const level = filters.levelSlug ? DEFAULT_LEVELS.find((l) => l.slug === filters.levelSlug) : undefined
   const where: Prisma.AthleteProfileWhereInput = {
+    ...activeAthlete,
     ...(query
       ? { OR: [{ user: { name: { contains: query, mode: 'insensitive' } } }, { city: { contains: query, mode: 'insensitive' } }, { district: { name: { contains: query, mode: 'insensitive' } } }] }
       : {}),
     ...(filters.gender ? { gender: filters.gender } : {}),
     ...(filters.districtId ? { districtId: filters.districtId } : {}),
     ...(filters.clubId ? { clubId: filters.clubId } : {}),
+    ...(level ? { rating: { gte: level.minRating, ...(level.maxRating != null ? { lte: level.maxRating } : {}) } } : {}),
   }
   const [rows, total] = await Promise.all([
     db.athleteProfile.findMany({
-      where, orderBy: { rating: 'desc' }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE,
+      where, orderBy: [{ rating: 'desc' }, { id: 'asc' }], skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE,
       include: { user: { select: { name: true, isActive: true } }, district: { select: { name: true } }, club: { select: { name: true } } },
     }),
     db.athleteProfile.count({ where }),
   ])
-  let cards = rows.map((a) => ({ ...toCard(a), isActive: a.user.isActive, gender: a.gender }))
-  // Level is derived from rating, not stored — filter in memory after the page query
-  // (fine at this scale; PAGE_SIZE is only 10 rows).
-  if (filters.levelSlug) cards = cards.filter((a) => levelInfo(a.rating).level.slug === filters.levelSlug)
   return {
-    rows: cards,
+    rows: rows.map((a) => ({ ...toCard(a), isActive: a.user.isActive, gender: a.gender })),
     total,
     pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
   }
@@ -139,7 +146,7 @@ export async function getAthletesAdminPage(query: string, page: number) {
     : {}
   const [rows, total] = await Promise.all([
     db.athleteProfile.findMany({
-      where, orderBy: { rating: 'desc' }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE,
+      where, orderBy: [{ rating: 'desc' }, { id: 'asc' }], skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE,
       include: { user: { select: { name: true, phone: true, isActive: true } }, district: { select: { name: true } }, club: { select: { name: true } } },
     }),
     db.athleteProfile.count({ where }),
@@ -183,6 +190,15 @@ export async function getRecentTrends(athleteIds: string[]) {
   )
 }
 
+/** Rank among active players without loading the whole leaderboard. Ties share a rank. */
+export async function getMyRank(rating: number) {
+  const [ahead, total] = await Promise.all([
+    db.athleteProfile.count({ where: { ...activeAthlete, rating: { gt: rating } } }),
+    db.athleteProfile.count({ where: activeAthlete }),
+  ])
+  return { rank: ahead + 1, total }
+}
+
 // Combines the new district relation with any legacy free-text city values
 // so the filter dropdown covers every athlete regardless of when they joined.
 export async function getCities() {
@@ -201,7 +217,7 @@ export async function getDiscovery(opts: { city?: string; sort?: 'match' | 'rati
   const me = await requireMe()
   const cityFilter = cityOrDistrictFilter(opts.city)
   const rows = await db.athleteProfile.findMany({
-    where: { id: { not: me.id }, ...(cityFilter ?? {}) },
+    where: { id: { not: me.id }, ...activeAthlete, ...(cityFilter ?? {}) },
     ...athleteCard,
   })
   let list = rows.map((a) => ({ ...toCard(a), match: levelMatch(me.rating, a.rating) }))
@@ -262,6 +278,7 @@ export async function getMyMatches() {
     date: m.scheduledAt ?? m.playedAt ?? null,
     court: m.court ? `${m.court.name}, ${m.court.location.name}` : null,
     canAccept: m.status === 'REQUESTED' && m.requestedById !== me.id,
+    canCancel: m.status === 'REQUESTED' && m.requestedById === me.id,
     canSubmitResult: m.status === 'ACCEPTED' || m.status === 'SCHEDULED',
     ...opponentSummary(m, me.id),
   }))
@@ -270,7 +287,7 @@ export async function getMyMatches() {
 /** Public match history for any athlete's profile — verified matches only. */
 export async function getVerifiedMatches(athleteId: string, take = 10) {
   const matches = await db.match.findMany({
-    where: { participants: { some: { athleteId } }, status: 'VERIFIED' },
+    where: { participants: { some: { athleteId } }, status: 'VERIFIED', ...playedMatch },
     orderBy: { verifiedAt: 'desc' },
     take,
     ...matchRow,
@@ -363,7 +380,7 @@ export async function getAthleteAdminDetail(athleteProfileId: string) {
   const [athlete, history, matches, competitions] = await Promise.all([
     db.athleteProfile.findUnique({
       where: { id: athleteProfileId },
-      include: { user: { select: { name: true, phone: true, isActive: true, createdAt: true } } },
+      include: { user: { select: { name: true, phone: true, isActive: true, createdAt: true } }, district: { select: { name: true } } },
     }),
     db.ratingHistory.findMany({ where: { athleteId: athleteProfileId }, orderBy: { createdAt: 'desc' }, take: 20 }),
     db.match.count({ where: { participants: { some: { athleteId: athleteProfileId } } } }),
@@ -376,30 +393,43 @@ export async function getAthleteAdminDetail(athleteProfileId: string) {
 }
 
 export async function getPublicCompetitions() {
-  return db.competition.findMany({
-    where: { status: { in: ['REGISTRATION_OPEN', 'REGISTRATION_CLOSED', 'ONGOING'] } },
+  const rows = await db.competition.findMany({
+    where: { status: { in: ['REGISTRATION_OPEN', 'REGISTRATION_CLOSED', 'ONGOING', 'COMPLETED'] } },
     orderBy: { startsAt: 'asc' },
     include: { location: true, _count: { select: { participants: { where: { status: { in: ['REGISTERED', 'CONFIRMED'] } } } } } },
   })
+  // Running/upcoming first (soonest first), finished ones after (most recent first).
+  const live = rows.filter((c) => c.status !== 'COMPLETED')
+  const done = rows.filter((c) => c.status === 'COMPLETED').reverse()
+  return [...live, ...done]
 }
 
+/** Drafts are never public — a guessed /competitions/<id> URL must 404 until the admin opens registration. */
 export async function getPublicCompetitionDetail(id: string) {
   const me = await getMe()
-  const competition = await db.competition.findUnique({
-    where: { id },
+  const competition = await db.competition.findFirst({
+    where: { id, status: { not: 'DRAFT' } },
     include: {
       location: true,
       participants: {
-        where: { status: { in: ['REGISTERED', 'CONFIRMED', 'WINNER'] } },
-        include: { athlete: { include: { user: { select: { name: true } } } } },
+        // Everyone who is actually in the field; waitlisted entries are private to their owner.
+        where: { status: { in: ['REGISTERED', 'CONFIRMED', 'ELIMINATED', 'WINNER'] } },
+        include: { athlete: { include: { user: { select: { name: true } } } }, partner: { include: { user: { select: { name: true } } } } },
         orderBy: { registeredAt: 'asc' },
       },
     },
   })
   if (!competition) return null
-  const confirmedCount = competition.participants.length
-  const myEntry = me ? competition.participants.find((p) => p.athleteId === me.id) : undefined
-  return { competition, confirmedCount, isRegistered: !!myEntry, myStatus: myEntry?.status }
+  const seatsTaken = competition.participants.filter((p) => p.status === 'REGISTERED' || p.status === 'CONFIRMED').length
+
+  // Look the viewer's own entry up separately: it may be a waitlist entry, or they may be the *partner* on someone else's entry.
+  const myEntry = me
+    ? await db.competitionParticipant.findFirst({
+        where: { competitionId: id, OR: [{ athleteId: me.id }, { partnerId: me.id }] },
+        select: { status: true },
+      })
+    : null
+  return { competition, confirmedCount: seatsTaken, isRegistered: !!myEntry, myStatus: myEntry?.status }
 }
 
 export async function getCompetitionBracket(competitionId: string) {
@@ -451,12 +481,12 @@ export async function getReferees() {
 /** No auth required — powers the public landing page. */
 export async function getPublicStats() {
   const [players, matchesPlayed, activeCompetitions, courts, clubs, activeDistricts] = await Promise.all([
-    db.athleteProfile.count(),
-    db.match.count({ where: { status: 'VERIFIED' } }),
+    db.athleteProfile.count({ where: activeAthlete }),
+    db.match.count({ where: { status: 'VERIFIED', ...playedMatch } }),
     db.competition.count({ where: { status: { in: ['REGISTRATION_OPEN', 'ONGOING'] } } }),
     db.court.count({ where: { isActive: true } }),
     db.club.count(),
-    db.athleteProfile.findMany({ where: { districtId: { not: null } }, select: { districtId: true }, distinct: ['districtId'] }),
+    db.athleteProfile.findMany({ where: { ...activeAthlete, districtId: { not: null } }, select: { districtId: true }, distinct: ['districtId'] }),
   ])
   return { players, matchesPlayed, activeCompetitions, courts, clubs, activeDistricts: activeDistricts.length }
 }
@@ -472,7 +502,7 @@ export async function getDistrictDistribution() {
       id: true,
       name: true,
       slug: true,
-      _count: { select: { athletes: true, clubs: true } },
+      _count: { select: { athletes: { where: activeAthlete }, clubs: true } },
     },
     orderBy: { name: 'asc' },
   })

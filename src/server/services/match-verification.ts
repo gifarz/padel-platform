@@ -10,7 +10,7 @@
 import type { Match, Prisma, PrismaClient } from '@prisma/client'
 import { ratingService } from '@/lib/rating'
 import type { RatedPlayer } from '@/lib/rating'
-import { advanceWinner } from './bracket'
+import { advanceWinner, retractWinners, BracketError } from './bracket'
 
 export class MatchVerificationError extends Error {}
 
@@ -64,14 +64,27 @@ async function applyVerification(tx: Prisma.TransactionClient, matchId: string, 
 
   const verified = await tx.match.update({ where: { id: matchId }, data: { status: 'VERIFIED', verifiedById, verifiedAt: new Date() } })
 
-  // Bracket match: push the winning side (and doubles partner) into the next round.
-  if (verified.nextMatchId) {
+  // Bracket match: push the winning side (and doubles partner) into the next round,
+  // mark who is out, and close the competition once the final is decided.
+  if (verified.competitionId && verified.round != null) {
     const winners = match.participants.filter((p) => p.team === verified.winnerTeam)
-    for (const w of winners) {
-      // Doubles: advanceWinner dedupes by athleteId, so calling it once per
-      // winning participant (rather than trying to guess a "primary" player
-      // and a partner) is simplest and still only inserts each athlete once.
-      await advanceWinner(tx, matchId, w.athleteId)
+    const losers = match.participants.filter((p) => p.team !== verified.winnerTeam)
+    // advanceWinner dedupes by athleteId, so calling it once per winning
+    // participant is simplest and still inserts each athlete only once.
+    if (verified.nextMatchId) for (const w of winners) await advanceWinner(tx, matchId, w.athleteId)
+
+    const loserIds = losers.map((p) => p.athleteId)
+    await tx.competitionParticipant.updateMany({
+      where: { competitionId: verified.competitionId, status: 'CONFIRMED', OR: [{ athleteId: { in: loserIds } }, { partnerId: { in: loserIds } }] },
+      data: { status: 'ELIMINATED' },
+    })
+    if (!verified.nextMatchId) {
+      const winnerIds = winners.map((p) => p.athleteId)
+      await tx.competitionParticipant.updateMany({
+        where: { competitionId: verified.competitionId, status: 'CONFIRMED', OR: [{ athleteId: { in: winnerIds } }, { partnerId: { in: winnerIds } }] },
+        data: { status: 'WINNER' },
+      })
+      await tx.competition.update({ where: { id: verified.competitionId }, data: { status: 'COMPLETED' } })
     }
   }
 
@@ -99,6 +112,23 @@ export function correctMatchResult(
       throw new MatchVerificationError('Hanya pertandingan yang sudah diverifikasi yang bisa dikoreksi')
     }
     if (match.winnerTeam === correctedWinner) throw new MatchVerificationError('Pemenangnya sama dengan hasil sebelumnya')
+
+    // Bracket match: take the old winner back out of the next round and reopen the outcome.
+    if (match.competitionId && match.round != null) {
+      const oldWinnerIds = match.participants.filter((p) => p.team === match.winnerTeam).map((p) => p.athleteId)
+      try {
+        await retractWinners(tx, matchId, oldWinnerIds)
+      } catch (err) {
+        if (err instanceof BracketError) throw new MatchVerificationError(err.message)
+        throw err
+      }
+      const everyone = match.participants.map((p) => p.athleteId)
+      await tx.competitionParticipant.updateMany({
+        where: { competitionId: match.competitionId, status: { in: ['ELIMINATED', 'WINNER'] }, OR: [{ athleteId: { in: everyone } }, { partnerId: { in: everyone } }] },
+        data: { status: 'CONFIRMED' },
+      })
+      await tx.competition.updateMany({ where: { id: match.competitionId, status: 'COMPLETED' }, data: { status: 'ONGOING' } })
+    }
 
     for (const p of match.participants) {
       if (p.ratingDelta == null) continue

@@ -13,6 +13,20 @@ export async function requestMatchAction(opponentAthleteId: string) {
   const { athleteId: meId } = await requireAthlete()
   if (meId === opponentAthleteId) throw new Error('Tidak bisa menantang diri sendiri.')
 
+  const opponent = await db.athleteProfile.findUnique({ where: { id: opponentAthleteId }, select: { user: { select: { isActive: true } } } })
+  if (!opponent || !opponent.user.isActive) throw new Error('Pemain tidak ditemukan atau sedang nonaktif.')
+
+  // One open challenge per pair is plenty — stops accidental double-clicks and spam.
+  const dupe = await db.match.findFirst({
+    where: {
+      competitionId: null,
+      status: { in: ['REQUESTED', 'ACCEPTED', 'SCHEDULED', 'PENDING_VERIFICATION'] },
+      AND: [{ participants: { some: { athleteId: meId } } }, { participants: { some: { athleteId: opponentAthleteId } } }],
+    },
+    select: { id: true },
+  })
+  if (dupe) throw new Error('Kamu masih punya pertandingan yang belum selesai dengan pemain ini.')
+
   const match = await db.match.create({
     data: {
       format: 'SINGLES',
@@ -30,52 +44,77 @@ export async function requestMatchAction(opponentAthleteId: string) {
   return match.id
 }
 
+async function loadMyMatch(matchId: string, meId: string) {
+  const match = await db.match.findUnique({ where: { id: matchId }, include: { participants: true } })
+  const mine = match?.participants.find((p) => p.athleteId === meId)
+  if (!match || !mine) throw new Error('Kamu bukan bagian dari pertandingan ini.')
+  return { match, mine }
+}
+
 export async function acceptMatchAction(matchId: string) {
   const { athleteId: meId } = await requireAthlete()
-  const participant = await db.matchParticipant.findUnique({ where: { matchId_athleteId: { matchId, athleteId: meId } } })
-  if (!participant) throw new Error('Kamu bukan bagian dari pertandingan ini.')
+  const { match, mine } = await loadMyMatch(matchId, meId)
+  if (match.status !== 'REQUESTED') throw new Error('Tantangan ini sudah tidak menunggu jawaban.')
+  if (match.requestedById === meId) throw new Error('Kamu tidak bisa menerima tantanganmu sendiri.')
 
   await db.$transaction([
-    db.matchParticipant.update({ where: { id: participant.id }, data: { acceptedAt: new Date() } }),
+    db.matchParticipant.update({ where: { id: mine.id }, data: { acceptedAt: new Date() } }),
     db.match.update({ where: { id: matchId }, data: { status: 'ACCEPTED' } }),
   ])
   revalidatePath('/matches')
+  revalidatePath('/admin/matches')
 }
 
+/** The challenged player declines, or the challenger withdraws — only while the challenge is still open. */
 export async function declineMatchAction(matchId: string) {
   const { athleteId: meId } = await requireAthlete()
-  const participant = await db.matchParticipant.findUnique({ where: { matchId_athleteId: { matchId, athleteId: meId } } })
-  if (!participant) throw new Error('Kamu bukan bagian dari pertandingan ini.')
-  await db.match.update({ where: { id: matchId }, data: { status: 'CANCELLED', cancelReason: 'Ditolak oleh lawan' } })
+  const { match } = await loadMyMatch(matchId, meId)
+  if (match.status !== 'REQUESTED') throw new Error('Pertandingan ini sudah diterima atau selesai, tidak bisa ditolak lagi.')
+  const reason = match.requestedById === meId ? 'Dibatalkan oleh penantang' : 'Ditolak oleh lawan'
+  await db.match.update({ where: { id: matchId }, data: { status: 'CANCELLED', cancelReason: reason } })
   revalidatePath('/matches')
+  revalidatePath('/admin/matches')
 }
 
 /** Score is entered from the submitting player's own side; we flip it if they're on team B. */
 export async function submitResultAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const { athleteId: meId, userId } = await requireAthlete()
-  const matchId = String(formData.get('matchId'))
+  const matchId = String(formData.get('matchId') ?? '')
   const scoreText = String(formData.get('score') ?? '')
 
-  const participant = await db.matchParticipant.findUnique({ where: { matchId_athleteId: { matchId, athleteId: meId } } })
-  if (!participant) return { error: 'Kamu bukan bagian dari pertandingan ini.' }
+  let loaded: Awaited<ReturnType<typeof loadMyMatch>>
+  try {
+    loaded = await loadMyMatch(matchId, meId)
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Pertandingan tidak ditemukan.' }
+  }
+  const { match, mine } = loaded
+  // Without this a player could overwrite an already-verified result and have it counted twice.
+  if (match.status !== 'ACCEPTED' && match.status !== 'SCHEDULED') {
+    return { error: match.status === 'PENDING_VERIFICATION' ? 'Skor sudah dikirim dan menunggu verifikasi.' : 'Skor tidak bisa dikirim untuk pertandingan ini.' }
+  }
+  const sides = new Set(match.participants.map((p) => p.team))
+  if (!sides.has('A') || !sides.has('B')) return { error: 'Pertandingan ini belum punya dua sisi pemain.' }
 
   const parsed = parseScore(scoreText)
   if ('error' in parsed) return { error: parsed.error }
 
   // Sets are always stored from Team A's perspective.
-  const sets = participant.team === 'A' ? parsed.sets : flipSets(parsed.sets)
-  const winnerTeam = participant.team === 'A' ? parsed.winner : parsed.winner === 'A' ? 'B' : 'A'
+  const sets = mine.team === 'A' ? parsed.sets : flipSets(parsed.sets)
+  const winnerTeam = mine.team === 'A' ? parsed.winner : parsed.winner === 'A' ? 'B' : 'A'
 
-  await db.match.update({
-    where: { id: matchId },
+  // Guarded write: only succeeds if nobody changed the status since we read it.
+  const res = await db.match.updateMany({
+    where: { id: matchId, status: { in: ['ACCEPTED', 'SCHEDULED'] } },
     data: { sets, winnerTeam, status: 'PENDING_VERIFICATION', submittedById: userId, playedAt: new Date() },
   })
+  if (res.count === 0) return { error: 'Status pertandingan berubah. Muat ulang halaman.' }
   revalidatePath('/matches')
   revalidatePath('/admin/matches')
   return { ok: 'Skor terkirim, menunggu verifikasi.' }
 }
 
-/** Admin (or a referee) verifies a result — this is what actually moves ratings. */
+/** Admin verifies a result — this is what actually moves ratings. */
 export async function verifyMatchAction(matchId: string): Promise<FormState> {
   const { userId } = await requireAdmin()
   try {
@@ -87,6 +126,8 @@ export async function verifyMatchAction(matchId: string): Promise<FormState> {
   revalidatePath('/admin/matches')
   revalidatePath('/ranking')
   revalidatePath('/dashboard')
+  revalidatePath('/admin/competitions', 'layout')
+  revalidatePath('/competitions', 'layout')
   // Verified matches change the landing page's match count and ranking preview.
   revalidatePublicSite()
   return { ok: 'Hasil diverifikasi, poin diperbarui.' }
@@ -95,16 +136,19 @@ export async function verifyMatchAction(matchId: string): Promise<FormState> {
 export async function correctMatchAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const { userId } = await requireAdmin()
   const matchId = String(formData.get('matchId'))
-  const winner = formData.get('winner') as 'A' | 'B'
-  const note = String(formData.get('note') ?? '') || undefined
+  const winner = String(formData.get('winner') ?? '')
+  if (winner !== 'A' && winner !== 'B') return { error: 'Pilih pemenang yang valid.' }
+  const winnerTeam: 'A' | 'B' = winner === 'A' ? 'A' : 'B'
+  const note = String(formData.get('note') ?? '').trim().slice(0, 300) || undefined
   try {
-    await correctMatchResult(db, matchId, winner, userId, note)
+    await correctMatchResult(db, matchId, winnerTeam, userId, note)
   } catch (err) {
     if (err instanceof MatchVerificationError) return { error: err.message }
     throw err
   }
   revalidatePath('/admin/matches')
   revalidatePath('/ranking')
+  revalidatePath('/admin/competitions', 'layout')
   revalidatePublicSite()
   return { ok: 'Hasil dikoreksi, poin diperbarui ulang.' }
 }
@@ -137,6 +181,8 @@ export async function adminCreateMatchAction(_prev: FormState, formData: FormDat
   if ('error' in teams) return { error: teams.error }
 
   const scheduledAt = parseLocalDateTime(formData.get('scheduledAt'))
+  const found = await db.athleteProfile.count({ where: { id: { in: [...teams.teamA, ...teams.teamB] } } })
+  if (found !== teams.teamA.length + teams.teamB.length) return { error: 'Ada atlet yang tidak ditemukan.' }
   await db.match.create({
     data: {
       format: teams.teamA.length > 1 ? 'DOUBLES' : 'SINGLES',
@@ -189,6 +235,8 @@ export async function updateMatchAction(_prev: FormState, formData: FormData): P
 
   const teams = readTeams(formData)
   if ('error' in teams) return { error: teams.error }
+  const found = await db.athleteProfile.count({ where: { id: { in: [...teams.teamA, ...teams.teamB] } } })
+  if (found !== teams.teamA.length + teams.teamB.length) return { error: 'Ada atlet yang tidak ditemukan.' }
 
   const statusRaw = String(formData.get('status') ?? match.status)
   const status: EditableStatus = (EDITABLE_STATUSES as readonly string[]).includes(statusRaw) ? (statusRaw as EditableStatus) : (match.status as EditableStatus)

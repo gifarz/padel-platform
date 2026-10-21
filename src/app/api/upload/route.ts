@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { saveImage, UploadError } from '@/server/uploads'
-import { UPLOAD_FOLDERS, type UploadFolder } from '@/lib/uploads'
+import { UPLOAD_FOLDERS, MAX_UPLOAD_BYTES, type UploadFolder } from '@/lib/uploads'
 
 export const runtime = 'nodejs'
 
@@ -10,6 +10,12 @@ export async function POST(req: Request) {
   const session = await auth()
   if (session?.user?.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Hanya admin yang boleh mengunggah.' }, { status: 401 })
+  }
+
+  // Refuse oversized bodies up front instead of buffering them into memory first.
+  const declared = Number(req.headers.get('content-length') ?? 0)
+  if (declared > MAX_UPLOAD_BYTES + 512 * 1024) {
+    return NextResponse.json({ error: 'Ukuran gambar maksimal 5 MB.' }, { status: 413 })
   }
 
   try {

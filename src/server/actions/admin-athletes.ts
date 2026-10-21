@@ -6,7 +6,15 @@ import { requireAdmin } from '@/server/guards'
 import { getAthletesAdminPage } from '@/server/queries'
 import { normalizeIndonesianPhone } from '@/lib/phone'
 import { revalidatePublicSite } from '@/server/revalidate'
+import { generateTempPassword } from '@/lib/password'
 import type { FormState } from '@/server/form-state'
+
+/** Prisma errors can leak table/column names; map the common ones and hide the rest. */
+function dbError(err: unknown, fallback: string) {
+  const code = typeof err === 'object' && err && 'code' in err ? (err as { code?: string }).code : undefined
+  if (code === 'P2002') return 'Nomor HP atau username sudah dipakai.'
+  return fallback
+}
 
 export async function searchAthletesAction(query: string, page: number) {
   await requireAdmin()
@@ -15,6 +23,7 @@ export async function searchAthletesAction(query: string, page: number) {
 
 export async function setAthletesActiveAction(athleteProfileIds: string[], isActive: boolean) {
   await requireAdmin()
+  if (athleteProfileIds.length === 0) return
   const users = await db.athleteProfile.findMany({ where: { id: { in: athleteProfileIds } }, select: { userId: true } })
   await db.user.updateMany({ where: { id: { in: users.map((u) => u.userId) } }, data: { isActive } })
   revalidatePath('/admin/athletes')
@@ -34,7 +43,12 @@ export async function createAthleteAction(_prev: FormState, formData: FormData):
     const username = String(formData.get('username') ?? '').trim().toLowerCase()
     const districtId = String(formData.get('districtId') ?? '').trim()
     const clubId = String(formData.get('clubId') ?? '').trim() || undefined
-    const gender = String(formData.get('gender') ?? 'MALE')
+    const genderRaw = String(formData.get('gender') ?? '')
+
+    if (genderRaw !== 'MALE' && genderRaw !== 'FEMALE') return { error: 'Pilih jenis kelamin.' }
+    const gender: 'MALE' | 'FEMALE' = genderRaw === 'FEMALE' ? 'FEMALE' : 'MALE'
+    if (name.length > 100) return { error: 'Nama terlalu panjang.' }
+    if (!/^[a-z0-9._]{3,30}$/.test(username)) return { error: 'Username 3–30 karakter: huruf kecil, angka, titik, atau garis bawah.' }
 
     if (!name || !rawPhone || !username || !districtId) {
       return { error: 'Lengkapi nama, nomor HP, username, dan kecamatan.' }
@@ -50,8 +64,9 @@ export async function createAthleteAction(_prev: FormState, formData: FormData):
     if (phoneExists) return { error: 'Nomor HP sudah terdaftar.' }
     if (usernameExists) return { error: 'Username sudah dipakai.' }
     if (!district) return { error: 'Kecamatan tidak valid.' }
+    if (clubId && !(await db.club.findUnique({ where: { id: clubId }, select: { id: true } }))) return { error: 'Klub tidak valid.' }
 
-    const tempPassword = Math.random().toString(36).slice(2, 10)
+    const tempPassword = generateTempPassword()
     const passwordHash = await bcrypt.hash(tempPassword, 10)
 
     await db.user.create({
@@ -65,7 +80,7 @@ export async function createAthleteAction(_prev: FormState, formData: FormData):
             username,
             districtId,
             clubId,
-            gender: gender as 'MALE' | 'FEMALE',
+            gender,
             rating: 1000, // everyone starts at the Penantang floor
           },
         },
@@ -81,7 +96,7 @@ export async function createAthleteAction(_prev: FormState, formData: FormData):
     revalidatePublicSite()
     return { ok: `Atlet dibuat. Kata sandi sementara: ${tempPassword}` }
   } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Gagal membuat atlet.' }
+    return { error: dbError(err, 'Gagal membuat atlet.') }
   }
 }
 
@@ -113,6 +128,8 @@ export async function updateAthleteAction(_prev: FormState, formData: FormData):
     if (phoneOwner && phoneOwner.id !== athlete.userId) return { error: 'Nomor HP sudah dipakai akun lain.' }
     if (usernameOwner && usernameOwner.id !== id) return { error: 'Username sudah dipakai.' }
     if (!district) return { error: 'Kecamatan tidak valid.' }
+    if (!/^[a-z0-9._]{3,30}$/.test(username)) return { error: 'Username 3–30 karakter: huruf kecil, angka, titik, atau garis bawah.' }
+    if (clubId && !(await db.club.findUnique({ where: { id: clubId }, select: { id: true } }))) return { error: 'Klub tidak valid.' }
 
     await db.$transaction([
       db.user.update({ where: { id: athlete.userId }, data: { name, phone } }),
@@ -121,7 +138,7 @@ export async function updateAthleteAction(_prev: FormState, formData: FormData):
     revalidateAthletePages()
     return { ok: `Data atlet "${name}" diperbarui.` }
   } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Gagal memperbarui atlet.' }
+    return { error: dbError(err, 'Gagal memperbarui atlet.') }
   }
 }
 

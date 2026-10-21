@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getMe, getDiscovery, getMyMatches, levelInfo, getLeaderboard } from '@/server/queries'
+import { getMe, getDiscovery, getMyMatches, levelInfo, getMyRank } from '@/server/queries'
 import { fmtNum, fmtDate } from '@/lib/format'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { StatusBadge } from '@/components/ui/badge'
@@ -8,13 +8,12 @@ export default async function DashboardPage() {
   const me = await getMe()
   if (!me) return null // middleware already redirects signed-out visitors
 
-  const [{ level, next }, rivals, matches, board] = await Promise.all([
+  const [{ level, next }, rivals, matches, { rank, total }] = await Promise.all([
     Promise.resolve(levelInfo(me.rating)),
     getDiscovery({ sort: 'match' }).then((r) => r.slice(0, 3)),
     getMyMatches(),
-    getLeaderboard({ take: 500 }),
+    getMyRank(me.rating),
   ])
-  const rank = board.findIndex((a) => a.id === me.id) + 1
   const upcoming = matches.filter((m) => m.status === 'SCHEDULED' || m.status === 'REQUESTED').slice(0, 4)
 
   return (
@@ -31,8 +30,8 @@ export default async function DashboardPage() {
           </div>
           <div className="border border-t-0 border-line bg-surface p-6 sm:border-t sm:border-l-0">
             <p className="lb">Peringkat</p>
-            <p className="d text-5xl">{rank ? `#${rank}` : '-'}</p>
-            <p className="mt-1 text-sm text-muted">dari {board.length} pemain</p>
+            <p className="d text-5xl">#{rank}</p>
+            <p className="mt-1 text-sm text-muted">dari {total} pemain</p>
           </div>
           <div className="border border-t-0 border-line bg-surface p-6 sm:border-t sm:border-l-0">
             <p className="lb">Rasio menang</p>

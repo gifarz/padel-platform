@@ -24,3 +24,26 @@ export function sanitizeImageUrl(raw: unknown): string | undefined {
   } catch {}
   return undefined
 }
+
+/**
+ * Admin-entered outbound links (club website / Instagram) end up in <a href>.
+ * Only http(s) is accepted so a `javascript:` URL can never be stored.
+ */
+export function sanitizeExternalUrl(raw: unknown): string | undefined {
+  const v = String(raw ?? '').trim()
+  if (!v) return undefined
+  try {
+    const u = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`)
+    if (u.protocol === 'https:' || u.protocol === 'http:') return u.toString()
+  } catch {}
+  return undefined
+}
+
+/** "@garutpadel", "garutpadel" or a full URL → https://instagram.com/garutpadel. */
+export function normalizeInstagram(raw: unknown): string | undefined {
+  const v = String(raw ?? '').trim()
+  if (!v) return undefined
+  if (/^https?:\/\//i.test(v) || v.includes('instagram.com')) return sanitizeExternalUrl(v)
+  const handle = v.replace(/^@/, '')
+  return /^[A-Za-z0-9._]{1,30}$/.test(handle) ? `https://instagram.com/${handle}` : undefined
+}

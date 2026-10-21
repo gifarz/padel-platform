@@ -8,7 +8,7 @@ import type { NextAuthConfig } from 'next-auth'
  */
 export const authConfig = {
   pages: { signIn: '/login' },
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: 60 * 60 * 24 * 7 }, // re-login weekly
   callbacks: {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user
@@ -18,7 +18,7 @@ export const authConfig = {
       const isStaffRoute = path.startsWith('/staff')
 
       if (isAdminRoute) return isLoggedIn && auth?.user?.role === 'SUPER_ADMIN'
-      if (isAthleteRoute) return isLoggedIn
+      if (isAthleteRoute) return isLoggedIn // layouts bounce other roles to their own area
       if (isStaffRoute) return isLoggedIn
       return true
     },

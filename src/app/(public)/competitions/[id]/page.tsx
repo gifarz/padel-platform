@@ -1,20 +1,21 @@
 import { notFound } from 'next/navigation'
-import { getPublicCompetitionDetail, getMe } from '@/server/queries'
+import { getPublicCompetitionDetail, getMe, getCompetitionBracket } from '@/server/queries'
 import { StatusBadge } from '@/components/ui/badge'
 import { RegisterCompetitionForm } from '@/components/athlete/register-competition-form'
+import { WithdrawButton } from '@/components/athlete/withdraw-button'
+import { BracketView } from '@/components/admin/bracket-view'
+import { CATEGORY_LABEL, isDoublesCategory, isRegistrationOpen } from '@/lib/competition'
 import { fmtDate, fmtNum } from '@/lib/format'
-
-const CATEGORY_LABEL: Record<string, string> = {
-  MENS_DOUBLES: 'Ganda putra', WOMENS_DOUBLES: 'Ganda putri', MIXED_DOUBLES: 'Ganda campuran',
-  MENS_SINGLES: 'Tunggal putra', WOMENS_SINGLES: 'Tunggal putri', OPEN: 'Terbuka',
-}
 
 export default async function CompetitionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const detail = await getPublicCompetitionDetail(id)
+  const [detail, me] = await Promise.all([getPublicCompetitionDetail(id), getMe()])
   if (!detail) notFound()
-  const { competition: c, isRegistered, myStatus } = detail
-  const me = await getMe()
+  const { competition: c, isRegistered, myStatus, confirmedCount } = detail
+  const registrationOpen = isRegistrationOpen(c)
+  const canWithdraw = isRegistered && (c.status === 'REGISTRATION_OPEN' || c.status === 'REGISTRATION_CLOSED') && myStatus !== 'ELIMINATED' && myStatus !== 'WINNER'
+  const bracket = c.status === 'ONGOING' || c.status === 'COMPLETED' ? await getCompetitionBracket(c.id) : null
+  const doubles = isDoublesCategory(c.category)
 
   return (
     <div>
@@ -32,7 +33,7 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
       {c.description && <p className="max-w-2xl text-sm text-muted">{c.description}</p>}
 
       <div className="mt-8 grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
-        <div className="bg-bg p-5"><p className="d text-3xl">{c.participants.length}/{c.maxPlayers}</p><p className="lb">Peserta</p></div>
+        <div className="bg-bg p-5"><p className="d text-3xl">{confirmedCount}/{c.maxPlayers}</p><p className="lb">Peserta</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl">{fmtDate(c.startsAt)}</p><p className="lb">Mulai</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl">{fmtDate(c.registrationDeadline)}</p><p className="lb">Batas daftar</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl text-accent">{c.prize ?? '-'}</p><p className="lb">Hadiah</p></div>
@@ -47,12 +48,19 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
       <div className="mt-10">
         {!me && <p className="text-sm text-muted">Masuk dulu untuk mendaftar kompetisi ini.</p>}
         {me && isRegistered && (
-          <p className="border border-line bg-surface p-5 text-sm">
-            Kamu sudah terdaftar dengan status: <StatusBadge status={myStatus ?? 'REGISTERED'} />
+          <div className="border border-line bg-surface p-5 text-sm">
+            <p>Kamu sudah terdaftar dengan status: <StatusBadge status={myStatus ?? 'REGISTERED'} /></p>
+            {canWithdraw && <WithdrawButton competitionId={c.id} />}
+          </div>
+        )}
+        {me && !isRegistered && registrationOpen && (
+          <RegisterCompetitionForm competitionId={c.id} doubles={doubles || c.category === 'OPEN'} partnerOptional={c.category === 'OPEN'} />
+        )}
+        {me && !isRegistered && !registrationOpen && (
+          <p className="text-sm text-muted">
+            {c.status === 'REGISTRATION_OPEN' ? 'Batas pendaftaran sudah lewat.' : 'Pendaftaran untuk kompetisi ini sudah ditutup.'}
           </p>
         )}
-        {me && !isRegistered && c.status === 'REGISTRATION_OPEN' && <RegisterCompetitionForm competitionId={c.id} />}
-        {me && !isRegistered && c.status !== 'REGISTRATION_OPEN' && <p className="text-sm text-muted">Pendaftaran untuk kompetisi ini sudah ditutup.</p>}
       </div>
 
       <h2 className="d mt-12 text-2xl">Peserta terdaftar</h2>
@@ -60,11 +68,22 @@ export default async function CompetitionDetailPage({ params }: { params: Promis
         {c.participants.length === 0 && <p className="py-6 text-sm text-muted">Belum ada peserta.</p>}
         {c.participants.map((p) => (
           <div key={p.id} className="flex items-center justify-between py-3">
-            <p className="font-display text-lg uppercase">{p.athlete.user.name}</p>
+            <p className="font-display text-lg uppercase">
+              {p.athlete.user.name}{p.partner ? ` / ${p.partner.user.name}` : ''}
+              {p.status === 'WINNER' && <span className="ml-2 text-xs text-accent">Juara</span>}
+              {p.status === 'ELIMINATED' && <span className="ml-2 text-xs text-muted">Gugur</span>}
+            </p>
             <p className="text-sm text-muted">{fmtNum(p.athlete.rating)} poin</p>
           </div>
         ))}
       </div>
+
+      {bracket && (
+        <>
+          <h2 className="d mt-12 text-2xl">Bagan pertandingan</h2>
+          <div className="mt-4 border border-line p-4"><BracketView rounds={bracket} /></div>
+        </>
+      )}
       </div>
     </div>
   )

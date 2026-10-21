@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireAdmin } from '@/server/guards'
 import { slugify } from '@/lib/slug'
-import { sanitizeImageUrl } from '@/lib/uploads'
+import { sanitizeImageUrl, sanitizeExternalUrl, normalizeInstagram } from '@/lib/uploads'
 import { revalidatePublicSite } from '@/server/revalidate'
 import type { FormState } from '@/server/form-state'
 
@@ -17,8 +17,13 @@ export async function createClubAction(_prev: FormState, formData: FormData): Pr
     const description = String(formData.get('description') ?? '').trim() || undefined
     const address = String(formData.get('address') ?? '').trim() || undefined
     const phone = String(formData.get('phone') ?? '').trim() || undefined
-    const instagram = String(formData.get('instagram') ?? '').trim() || undefined
-    const website = String(formData.get('website') ?? '').trim() || undefined
+    const instagramRaw = String(formData.get('instagram') ?? '').trim()
+    const websiteRaw = String(formData.get('website') ?? '').trim()
+    const instagram = normalizeInstagram(instagramRaw)
+    const website = sanitizeExternalUrl(websiteRaw)
+    if (instagramRaw && !instagram) return { error: 'Instagram tidak valid. Isi @username atau URL.' }
+    if (websiteRaw && !website) return { error: 'Website tidak valid. Isi URL yang diawali http(s)://.' }
+    if (districtId && !(await db.district.findUnique({ where: { id: districtId }, select: { id: true } }))) return { error: 'Kecamatan tidak valid.' }
     const logoUrl = sanitizeImageUrl(formData.get('logoUrl'))
     const isVerified = formData.get('isVerified') === 'on'
 
@@ -36,7 +41,7 @@ export async function createClubAction(_prev: FormState, formData: FormData): Pr
     revalidatePublicSite()
     return { ok: `Klub "${name}" dibuat.` }
   } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Gagal membuat klub.' }
+    return { error: 'Gagal membuat klub.' }
   }
 }
 
@@ -52,8 +57,10 @@ export async function deleteClubAction(id: string) {
   await requireAdmin()
   // Members reference the club optionally, so this just detaches them rather
   // than cascading — losing a club record shouldn't lose athlete data.
-  await db.athleteProfile.updateMany({ where: { clubId: id }, data: { clubId: null } })
-  await db.club.delete({ where: { id } })
+  await db.$transaction([
+    db.athleteProfile.updateMany({ where: { clubId: id }, data: { clubId: null } }),
+    db.club.delete({ where: { id } }),
+  ])
   revalidatePath('/admin/clubs')
   revalidatePath('/clubs')
   revalidatePublicSite()

@@ -18,7 +18,7 @@ export default async function AdminAthleteDetail({
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
         <div>
-          <p className="lb">@{athlete.username} · {athlete.city} · {level.name}</p>
+          <p className="lb">@{athlete.username} · {athlete.district?.name ?? athlete.city ?? '-'} · {level.name}</p>
           <h1 className="d text-4xl sm:text-6xl">{athlete.user.name}</h1>
           <p className="mt-1 text-sm text-muted">{athlete.user.phone} · Terdaftar {fmtDate(athlete.user.createdAt)}</p>
         </div>

@@ -9,7 +9,10 @@ export const initials = (name: string) =>
 /** <input type="datetime-local"> value → Date, treating it as Jakarta time (UTC+7). */
 export const parseLocalDateTime = (v?: FormDataEntryValue | null) => {
   if (!v || typeof v !== 'string') return null
-  const d = new Date(`${v}:00+07:00`)
+  // datetime-local gives "YYYY-MM-DDTHH:mm" (seconds only if step < 60); accept both.
+  const m = v.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(?::(\d{2}))?$/)
+  if (!m) return null
+  const d = new Date(`${m[1]}:${m[2] ?? '00'}+07:00`)
   return Number.isNaN(d.getTime()) ? null : d
 }
 /** Date → value for <input type="datetime-local">, in Jakarta time (inverse of parseLocalDateTime). */

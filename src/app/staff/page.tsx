@@ -1,4 +1,5 @@
 import { getMyStaffProfile } from '@/server/queries'
+import { ChangePasswordForm } from '@/components/change-password-form'
 
 const STATUS_LABEL: Record<string, string> = { ACTIVE: 'Aktif', INACTIVE: 'Nonaktif', SUSPENDED: 'Ditangguhkan' }
 
@@ -43,6 +44,8 @@ export default async function StaffPage() {
           </div>
         )}
       </div>
+
+      <ChangePasswordForm />
 
       <p className="mt-8 text-xs text-muted">
         Profil ini dikelola oleh admin PBPI Kabupaten Garut. Hubungi sekretariat jika ada data yang perlu diperbarui.

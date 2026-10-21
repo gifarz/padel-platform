@@ -2,6 +2,18 @@
 
 Next.js 15 (App Router) + TypeScript + Tailwind + Prisma + NextAuth.
 
+## Alur kompetisi (admin)
+
+1. **Buat** di `/admin/competitions` → status **Draf** (belum tampil di situs).
+2. Buka **Kelola** → tombol **Buka pendaftaran** (butuh batas pendaftaran yang belum lewat).
+3. Atlet mendaftar di `/competitions/[id]` (ganda: isi username pasangan). Kuota penuh → daftar tunggu.
+4. **Tutup pendaftaran**, ubah peserta menjadi **Dikonfirmasi**.
+5. **Buat bracket** → status otomatis **Berlangsung**.
+6. Verifikasi hasil tiap pertandingan di `/admin/matches`; pemenang maju otomatis, yang kalah jadi **Gugur**.
+7. Setelah final diverifikasi → juara ditandai dan kompetisi **Selesai** otomatis.
+
+Detail temuan bug & perbaikan: lihat [`AUDIT.md`](./AUDIT.md). Setelah menarik versi ini jalankan `npx prisma migrate deploy`.
+
 ## Pembaruan terbaru
 
 - **Rating → Poin** — seluruh teks yang tampil di UI (admin, atlet, publik, pesan error) sekarang memakai istilah "Poin". Nama kolom database & kode (`rating`, `peakRating`, `RatingHistory`) sengaja tidak diubah supaya tidak perlu migrasi.
@@ -40,7 +52,7 @@ lama secara akurat sebelum menghitung ulang, dan keduanya jalan di transaksi lev
 ## Baru: bracket turnamen, tren peringkat, dan edit profil
 
 - **Bracket turnamen** (`src/server/services/bracket.ts`) — generator single elimination sungguhan. Dari peserta berstatus "Dikonfirmasi", diurutkan berdasarkan rating (seed), dipasangkan dengan urutan bracket standar (unggulan 1 vs paling bawah, dst) supaya unggulan teratas nggak ketemu di babak awal. Kalau jumlah peserta bukan kelipatan 2, otomatis dapat bye. Begitu admin memverifikasi hasil suatu pertandingan bracket, pemenangnya **otomatis maju** ke babak berikutnya (`advanceWinner`, dipanggil dari `match-verification.ts`) — nggak perlu isi manual. Tombol "Buat bracket" dan tampilan bracket-nya ada di halaman detail kompetisi admin.
-  - Batasan yang saya sadari: kalau admin mengoreksi hasil pertandingan bracket yang sudah bikin pemenangnya maju ke babak berikutnya, sistem *menambahkan* pemenang baru tapi *tidak mencabut* pemenang lama dari babak berikutnya. Ini kasus tepi yang jarang terjadi (koreksi pada pertandingan bracket, bukan pertandingan biasa), tapi saya belum sempat menanganinya — kalau kejadian, admin perlu membetulkan peserta babak berikutnya secara manual.
+  - ~~Koreksi hasil bracket tidak mencabut pemenang lama~~ → sudah ditangani (lihat AUDIT.md #4). Koreksi ditolak jika babak berikutnya sudah dimainkan.
 - **Tren naik/turun di peringkat** — sekarang dihitung dari perubahan rating terakhir tiap atlet (`getRecentTrends`), bukan lagi kosong. Muncul di kolom "Tren" halaman `/ranking`.
 - **Edit profil sendiri** (`/settings`) — atlet bisa ubah kota, tangan dominan, posisi favorit, dan bio pendek. Bio dan info ini juga muncul di halaman profil publik kalau sudah diisi.
 
@@ -64,10 +76,10 @@ Sekarang jadi rute `/` di aplikasi yang sama:
 ## Belum selesai / perlu diketahui
 
 - **Belum pernah dijalankan.** Tidak ada akses internet/database di lingkungan pengerjaan ini, jadi `npm install`, `prisma migrate`, dan `next dev` belum pernah benar-benar dieksekusi. Semua file sudah dicek pakai `tsc` (nol galat sungguhan — sisanya cuma "module not found" karena `node_modules` belum ada), tapi itu tidak sama dengan menjalankan aplikasinya. Bracket generator khususnya (`src/server/services/bracket.ts`) itu logika yang cukup rumit — sudah saya telusuri manual baris per baris untuk cari bug (dan memang nemu satu, sudah dibetulkan — lihat catatan "Perbaikan" di bawah), tapi belum pernah dicoba jalan di database sungguhan.
-- **Koreksi hasil** tidak menghitung ulang pertandingan-pertandingan berikutnya yang dimainkan atlet tersebut — mereka tetap memakai rating yang berlaku saat itu diverifikasi. Untuk pertandingan bracket, koreksi juga belum mencabut pemenang lama dari babak berikutnya (lihat catatan di atas).
+- **Koreksi hasil** tidak menghitung ulang pertandingan-pertandingan berikutnya yang dimainkan atlet tersebut — mereka tetap memakai rating yang berlaku saat itu diverifikasi. 
 - **Kata sandi sementara pelatih/wasit** ditampilkan langsung di layar admin, bukan dikirim lewat email — belum ada pengiriman email di proyek ini.
 - Bracket cuma mendukung format single elimination. Double elimination atau round-robin belum ada.
-- Belum ada halaman untuk atlet membatalkan pendaftaran kompetisi sendiri (admin bisa lewat "Keluarkan" di panel kelola peserta).
+- Atlet kini bisa membatalkan pendaftarannya sendiri selama pendaftaran belum berjalan.
 
 ## Perbaikan dari sesi sebelumnya
 

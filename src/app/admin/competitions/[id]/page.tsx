@@ -1,22 +1,28 @@
 import { notFound } from 'next/navigation'
-import { getCompetitionDetail, getCompetitionBracket } from '@/server/queries'
+import { getCompetitionDetail, getCompetitionBracket, getLocations } from '@/server/queries'
 import { StatusBadge } from '@/components/ui/badge'
 import { ParticipantStatus } from '@/components/admin/participant-status'
 import { GenerateBracketForm } from '@/components/admin/generate-bracket-form'
 import { BracketView } from '@/components/admin/bracket-view'
-import { fmtDate, fmtNum } from '@/lib/format'
-
-const CATEGORY_LABEL: Record<string, string> = {
-  MENS_DOUBLES: 'Ganda putra', WOMENS_DOUBLES: 'Ganda putri', MIXED_DOUBLES: 'Ganda campuran',
-  MENS_SINGLES: 'Tunggal putra', WOMENS_SINGLES: 'Tunggal putri', OPEN: 'Terbuka',
-}
+import { CompetitionStatusSelect } from '@/components/admin/competition-status-select'
+import { EditCompetitionForm } from '@/components/admin/edit-competition-form'
+import { AdminDeleteButton } from '@/components/admin/admin-delete-button'
+import { deleteCompetitionAction } from '@/server/actions/competitions'
+import { CATEGORY_LABEL, NEXT_STEP_HINT, type CompetitionStatusKey } from '@/lib/competition'
+import { fmtDate, fmtNum, toLocalDateTimeInput } from '@/lib/format'
 
 export default async function AdminCompetitionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const comp = await getCompetitionDetail(id)
+  const [comp, locations] = await Promise.all([getCompetitionDetail(id), getLocations()])
   if (!comp) notFound()
   const bracket = await getCompetitionBracket(comp.id)
+  const status = comp.status as CompetitionStatusKey
+
+  const seats = comp.participants.filter((p) => p.status === 'REGISTERED' || p.status === 'CONFIRMED').length
+  const waitlist = comp.participants.filter((p) => p.status === 'WAITLIST').length
   const confirmedCount = comp.participants.filter((p) => p.status === 'CONFIRMED').length
+  const canDelete = status === 'DRAFT' || status === 'CANCELLED'
+  const canEdit = status !== 'COMPLETED' && status !== 'CANCELLED'
 
   return (
     <div>
@@ -28,12 +34,37 @@ export default async function AdminCompetitionDetail({ params }: { params: Promi
         <StatusBadge status={comp.status} />
       </div>
 
+      <div className="mt-6 border border-line bg-surface p-5">
+        <p className="lb">Langkah berikutnya</p>
+        <p className="mt-1 text-sm text-muted">{NEXT_STEP_HINT[status]}</p>
+        <div className="mt-4"><CompetitionStatusSelect id={comp.id} status={status} /></div>
+      </div>
+
       <div className="mt-8 grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
-        <div className="bg-bg p-5"><p className="d text-3xl">{comp.participants.length}/{comp.maxPlayers}</p><p className="lb">Peserta</p></div>
+        <div className="bg-bg p-5"><p className="d text-3xl">{seats}/{comp.maxPlayers}</p><p className="lb">Peserta{waitlist ? ` · ${waitlist} antre` : ''}</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl">{fmtDate(comp.startsAt)}</p><p className="lb">Mulai</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl">{fmtDate(comp.registrationDeadline)}</p><p className="lb">Batas daftar</p></div>
         <div className="bg-bg p-5"><p className="d text-3xl text-accent">{comp.prize ?? '-'}</p><p className="lb">Hadiah</p></div>
       </div>
+
+      <div className="mt-4 flex flex-wrap items-start gap-3">
+        {canEdit && (
+          <EditCompetitionForm
+            competition={{
+              id: comp.id, name: comp.name, description: comp.description, locationId: comp.locationId, category: comp.category,
+              maxPlayers: comp.maxPlayers, prize: comp.prize, minRating: comp.minRating, maxRating: comp.maxRating,
+              startsAt: toLocalDateTimeInput(comp.startsAt), endsAt: toLocalDateTimeInput(comp.endsAt),
+              registrationDeadline: toLocalDateTimeInput(comp.registrationDeadline),
+            }}
+            locations={locations.map((l) => ({ id: l.id, name: l.name, city: l.city }))}
+            categoryLocked={comp.participants.length > 0 || !!bracket}
+          />
+        )}
+        {canDelete && <AdminDeleteButton id={comp.id} action={deleteCompetitionAction} confirmMessage="Hapus kompetisi ini beserta daftar pesertanya?" />}
+      </div>
+      {(comp.minRating || comp.maxRating) && (
+        <p className="mt-3 text-xs text-muted">Syarat poin: {comp.minRating ? `min ${fmtNum(comp.minRating)}` : ''}{comp.minRating && comp.maxRating ? ' · ' : ''}{comp.maxRating ? `maks ${fmtNum(comp.maxRating)}` : ''}</p>
+      )}
 
       <h2 className="d mt-10 text-2xl">Peserta</h2>
       <div className="mt-4 overflow-x-auto border border-line">
@@ -50,7 +81,7 @@ export default async function AdminCompetitionDetail({ params }: { params: Promi
                   {p.athlete.user.name}{p.partner ? ` / ${p.partner.user.name}` : ''}
                 </td>
                 <td className="td text-accent">{fmtNum(p.athlete.rating)}</td>
-                <td className="td"><ParticipantStatus id={p.id} status={p.status} competitionId={comp.id} /></td>
+                <td className="td"><ParticipantStatus id={p.id} status={p.status} competitionId={comp.id} locked={!!bracket} /></td>
               </tr>
             ))}
             {comp.participants.length === 0 && (
@@ -68,10 +99,14 @@ export default async function AdminCompetitionDetail({ params }: { params: Promi
       ) : (
         <div className="mt-4 border border-dashed border-line p-6">
           <p className="text-sm text-muted">
-            Belum dibuat. {confirmedCount} peserta berstatus "Dikonfirmasi" siap diundi. Ubah status peserta di atas dulu kalau ada yang belum dikonfirmasi.
+            Belum dibuat. {confirmedCount} peserta berstatus &quot;Dikonfirmasi&quot; siap diundi. Ubah status peserta di atas dulu kalau ada yang belum dikonfirmasi.
             Sistem otomatis mengisi bye kalau jumlah peserta bukan kelipatan 2, dan pemenang tiap babak maju otomatis begitu hasilnya diverifikasi.
           </p>
-          <GenerateBracketForm competitionId={comp.id} />
+          {status === 'REGISTRATION_CLOSED' || status === 'ONGOING' ? (
+            <GenerateBracketForm competitionId={comp.id} />
+          ) : (
+            <p className="mt-3 text-xs text-accent">Tutup pendaftaran dulu supaya daftar peserta sudah final.</p>
+          )}
         </div>
       )}
     </div>

@@ -145,7 +145,11 @@ export async function deleteLocationAction(id: string) {
   if (inUse > 0) throw new Error('Lokasi ini masih dipakai oleh kompetisi dan tidak bisa dihapus.')
   const matchesOnCourts = await db.match.count({ where: { court: { locationId: id } } })
   if (matchesOnCourts > 0) throw new Error('Lapangan di lokasi ini masih dipakai pertandingan, jadi lokasi tidak bisa dihapus.')
-  await db.court.deleteMany({ where: { locationId: id } })
-  await db.location.delete({ where: { id } })
+  const competitionsOnCourts = await db.competition.count({ where: { court: { locationId: id } } })
+  if (competitionsOnCourts > 0) throw new Error('Lapangan di lokasi ini masih dipakai kompetisi, jadi lokasi tidak bisa dihapus.')
+  await db.$transaction([
+    db.court.deleteMany({ where: { locationId: id } }),
+    db.location.delete({ where: { id } }),
+  ])
   afterLocationChange()
 }

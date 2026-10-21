@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getAthleteByUsername, getVerifiedMatches, getMe, levelInfo } from '@/server/queries'
 import { requestMatchAction } from '@/server/actions/matches'
 import { fmtNum, fmtDate } from '@/lib/format'
@@ -14,7 +14,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
 
   async function challenge() {
     'use server'
-    await requestMatchAction(athlete!.id)
+    let problem: string | null = null
+    try {
+      await requestMatchAction(athlete!.id)
+    } catch (err) {
+      problem = err instanceof Error ? err.message : 'Gagal mengirim tantangan.'
+    }
+    // redirect() works by throwing, so it must stay outside the try/catch.
+    redirect(problem ? `/matches?error=${encodeURIComponent(problem)}` : '/matches')
   }
 
   return (

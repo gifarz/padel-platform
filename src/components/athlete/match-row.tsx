@@ -13,11 +13,17 @@ interface Props {
   status: string
   delta: number | null
   canAccept: boolean
+  canCancel?: boolean
   canSubmitResult: boolean
 }
 
-export function MatchRow({ id, label, date, court, status, delta, canAccept, canSubmitResult }: Props) {
+export function MatchRow({ id, label, date, court, status, delta, canAccept, canCancel, canSubmitResult }: Props) {
   const [pending, startTransition] = useTransition()
+  // Server actions throw on rule violations (e.g. challenge already answered); show it instead of failing silently.
+  const run = (fn: () => Promise<void>) =>
+    startTransition(async () => {
+      try { await fn() } catch (err) { window.alert(err instanceof Error ? err.message : 'Gagal memproses.') }
+    })
   const [showScore, setShowScore] = useState(false)
   const [state, action, submitting] = useActionState<FormState, FormData>(submitResultAction, undefined)
 
@@ -35,9 +41,12 @@ export function MatchRow({ id, label, date, court, status, delta, canAccept, can
           <StatusBadge status={status} />
           {canAccept && (
             <div className="flex gap-2">
-              <button disabled={pending} onClick={() => startTransition(() => acceptMatchAction(id))} className="btn-p">Terima</button>
-              <button disabled={pending} onClick={() => startTransition(() => declineMatchAction(id))} className="btn-line">Tolak</button>
+              <button disabled={pending} onClick={() => run(() => acceptMatchAction(id))} className="btn-p">Terima</button>
+              <button disabled={pending} onClick={() => run(() => declineMatchAction(id))} className="btn-line">Tolak</button>
             </div>
+          )}
+          {canCancel && (
+            <button disabled={pending} onClick={() => { if (window.confirm('Batalkan tantangan ini?')) run(() => declineMatchAction(id)) }} className="btn-line">Batalkan</button>
           )}
           {canSubmitResult && !showScore && (
             <button onClick={() => setShowScore(true)} className="btn-line">Input skor</button>
@@ -48,7 +57,7 @@ export function MatchRow({ id, label, date, court, status, delta, canAccept, can
       {showScore && (
         <form action={action} className="mt-3 flex flex-wrap items-center gap-2 border border-line bg-surface p-3">
           <input type="hidden" name="matchId" value={id} />
-          <input name="score" placeholder="cth. 6-4, 3-6, 6-2 (dari sisi kamu)" className="inp max-w-xs" />
+          <input name="score" required placeholder="cth. 6-4, 3-6, 6-2 (dari sisi kamu)" className="inp max-w-xs" />
           <button disabled={submitting} className="btn-p">{submitting ? 'Mengirim…' : 'Kirim skor'}</button>
           {state?.error && <p className="w-full text-xs text-red-400">{state.error}</p>}
           {state?.ok && <p className="w-full text-xs text-accent">{state.ok}</p>}

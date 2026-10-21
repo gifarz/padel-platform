@@ -8,7 +8,9 @@ export function parseScore(text: string): ParsedScore {
   for (const p of parts) {
     const m = p.match(/^(\d{1,2})\s*[-:]\s*(\d{1,2})$/)
     if (!m) return { error: `Format skor "${p}" salah. Contoh: 6-4` }
-    sets.push([Number(m[1]), Number(m[2])])
+    const a = Number(m[1]), b = Number(m[2])
+    if (a === b) return { error: `Set "${p}" seri. Tiap set harus ada pemenangnya.` }
+    sets.push([a, b])
   }
   const a = sets.filter((s) => s[0]! > s[1]!).length
   const b = sets.filter((s) => s[1]! > s[0]!).length

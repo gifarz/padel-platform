@@ -71,13 +71,13 @@ export function CreateCompetitionForm({ locations: initialLocations }: { locatio
           {CATEGORIES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
 
-        <input name="maxPlayers" type="number" min={2} placeholder="Maks. peserta" required className="inp" />
+        <input name="maxPlayers" type="number" min={2} max={256} step={1} placeholder="Maks. peserta" required className="inp" />
         <input name="prize" placeholder="Hadiah (opsional)" className="inp" />
         <label className="text-xs text-muted">Mulai<input name="startsAt" type="datetime-local" required className="inp mt-1" /></label>
         <label className="text-xs text-muted">Selesai<input name="endsAt" type="datetime-local" required className="inp mt-1" /></label>
         <label className="text-xs text-muted sm:col-span-2">Batas pendaftaran<input name="registrationDeadline" type="datetime-local" required className="inp mt-1" /></label>
-        <input name="minRating" type="number" placeholder="Poin minimum (opsional)" className="inp" />
-        <input name="maxRating" type="number" placeholder="Poin maksimum (opsional)" className="inp" />
+        <input name="minRating" type="number" min={0} placeholder="Poin minimum (opsional)" className="inp" />
+        <input name="maxRating" type="number" min={0} placeholder="Poin maksimum (opsional)" className="inp" />
         <button disabled={pending} className="btn-p sm:col-span-2 sm:w-fit">{pending ? 'Membuat…' : 'Buat sebagai draf'}</button>
         {state?.error && <p role="alert" className="text-xs text-red-400 sm:col-span-2">{state.error}</p>}
         {state?.ok && <p role="status" className="text-xs text-accent sm:col-span-2">{state.ok}</p>}

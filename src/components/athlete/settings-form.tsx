@@ -15,8 +15,8 @@ export function SettingsForm({ city, bio, dominantHand, preferredPosition }: Pro
   return (
     <form action={action} className="mt-6 max-w-lg space-y-4 border border-line bg-surface p-6">
       <label className="block text-xs font-bold uppercase tracking-widest text-muted">
-        Kota
-        <input name="city" defaultValue={city} required className="inp mt-1" />
+        Kota (opsional)
+        <input name="city" defaultValue={city} maxLength={80} className="inp mt-1" />
       </label>
       <label className="block text-xs font-bold uppercase tracking-widest text-muted">
         Tangan dominan
