@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import { requireAthlete, requireUser } from '@/server/guards'
-import { MIN_PASSWORD_LENGTH } from '@/lib/password'
+import { MIN_PASSWORD_LENGTH } from '@/lib/password-rules'
 import type { FormState } from '@/server/form-state'
 
 const HANDS = ['RIGHT', 'LEFT'] as const

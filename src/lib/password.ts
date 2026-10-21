@@ -1,3 +1,4 @@
+import 'server-only'
 import { randomBytes } from 'node:crypto'
 
 // No 0/O/1/l/I so a temp password read out over the phone isn't ambiguous.
@@ -11,4 +12,3 @@ export function generateTempPassword(length = 10): string {
   return out
 }
 
-export const MIN_PASSWORD_LENGTH = 8

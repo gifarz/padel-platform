@@ -1,7 +1,7 @@
 'use client'
 import { useState, useTransition } from 'react'
 import { updateCompetitionStatusAction } from '@/server/actions/competitions'
-import { COMPETITION_STATUS_LABEL, STATUS_TRANSITIONS, type CompetitionStatusKey } from '@/lib/competition'
+import { STATUS_TRANSITIONS, type CompetitionStatusKey } from '@/lib/competition'
 
 /**
  * The missing piece of the competition flow: without this nothing ever moved a
@@ -55,4 +55,3 @@ function buttonLabel(t: CompetitionStatusKey) {
   }
 }
 
-export { COMPETITION_STATUS_LABEL }

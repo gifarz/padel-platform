@@ -2,7 +2,7 @@
 import { useActionState, useEffect, useRef } from 'react'
 import { changePasswordAction } from '@/server/actions/profile'
 import type { FormState } from '@/server/form-state'
-import { MIN_PASSWORD_LENGTH } from '@/lib/password'
+import { MIN_PASSWORD_LENGTH } from '@/lib/password-rules'
 
 /** Shared by the athlete settings page and the staff page — admins hand out temp passwords, this replaces them. */
 export function ChangePasswordForm() {
